@@ -1,0 +1,9 @@
+{
+  "fingerprint": "a30d351f83bb5e6d0fe6133a2352b1ab6a00e2c65f546081992436ec66ae13b5",
+  "total_chunks": 3957,
+  "embedding_dim": 384,
+  "model_name": "sentence-transformers/all-MiniLM-L6-v2",
+  "chunk_strategy": "sentence_aware",
+  "target_tokens": 192,
+  "created_at": "2026-10-13T11:07:36Z"
+}
