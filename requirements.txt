@@ -1,0 +1,6 @@
+numpy
+matplotlib
+sentence-transformers
+pytest
+requests
+beautifulsoup4

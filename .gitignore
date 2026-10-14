@@ -1,0 +1,60 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Downloaded models and HuggingFace cache
+.cache/
+hf_cache/
+transformers_cache/
+*.bin
+*.pt
+*.onnx
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+scratch/
+
+# Exclude confidential assignment prompts or documents
+*.pdf
+*.docx
+*.doc
+
+# Exclude local environment secrets and credentials
+.env
+*.env
+*.pem
+*.key
+*.token
+
+# Explicitly ensure benchmark results, figures, and data are tracked
+!results/
+!results/**
+!data/
+!data/**
+data/.cache/
+
+# Internal handover overview
+PROJECT_FULL_OVERVIEW.md
+
+# Ad-hoc exploration scripts
+scripts/find_candidates.py
+scripts/find_evidence.py
+scripts/scratch_explore.py
+scripts/search_keywords.py
+scripts/test_benchmark_candidates.py
