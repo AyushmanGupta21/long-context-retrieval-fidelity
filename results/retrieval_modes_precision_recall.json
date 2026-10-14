@@ -1,0 +1,4091 @@
+{
+  "experiment_title": "Apples-to-Apples Retrieval Mode Precision/Recall Evaluation",
+  "description": "Complete precision, recall, hit rate, and MRR comparison across Dense, BM25, and RRF on identical sentence-aware chunks at K=1, 3, 5, 10.",
+  "timestamp": "2026-10-14T02:44:25Z",
+  "corpus_settings": {
+    "chunk_strategy": "sentence_aware_192",
+    "total_chunks": 3957,
+    "total_queries": 30,
+    "dense_embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+    "dense_similarity": "cosine_similarity (NumPy dot product / norms)",
+    "lexical_algorithm": "BM25Okapi (k1=1.5, b=0.75)",
+    "rrf_parameters": {
+      "candidate_pool_depth_each": 50,
+      "c": 60.0,
+      "rank_offset": "1-based"
+    }
+  },
+  "consistency_checks": {
+    "precision_1_equals_hit_1": {
+      "description": "At K=1 with binary relevance, per-query Precision@1 is mathematically identical to Hit@1 (either 1/1 or 0/1). Macro-averages must match exactly.",
+      "dense_match": true,
+      "bm25_match": true,
+      "rrf_match": true,
+      "dense_values": {
+        "precision@1": 0.2333,
+        "hit_rate@1": 0.2333
+      },
+      "bm25_values": {
+        "precision@1": 0.3333,
+        "hit_rate@1": 0.3333
+      },
+      "rrf_values": {
+        "precision@1": 0.3333,
+        "hit_rate@1": 0.3333
+      }
+    },
+    "recall_monotonicity_check": {
+      "description": "When relevant set and rankings are fixed, Recall@K cannot decrease as K increases (monotonically non-decreasing).",
+      "dense_non_decreasing": true,
+      "bm25_non_decreasing": true,
+      "rrf_non_decreasing": true,
+      "dense_recalls": [
+        0.2167,
+        0.2833,
+        0.4333,
+        0.5
+      ],
+      "bm25_recalls": [
+        0.3167,
+        0.4,
+        0.4,
+        0.4833
+      ],
+      "rrf_recalls": [
+        0.3167,
+        0.4,
+        0.4333,
+        0.55
+      ]
+    },
+    "precision_behavior_note": {
+      "description": "Precision@K naturally decreases as K increases for narrow factual benchmark queries because relevant chunks per query are small (1 to 2), so increasing denominator K dilutes precision unless multiple relevant chunks exist at lower ranks.",
+      "dense_precisions": [
+        0.2333,
+        0.1,
+        0.0933,
+        0.0533
+      ],
+      "bm25_precisions": [
+        0.3333,
+        0.1444,
+        0.0867,
+        0.0533
+      ],
+      "rrf_precisions": [
+        0.3333,
+        0.1444,
+        0.0933,
+        0.06
+      ]
+    }
+  },
+  "metrics_summary_by_mode": {
+    "dense_only": {
+      "count": 30,
+      "hit_rate@1": 0.2333,
+      "precision@1": 0.2333,
+      "recall@1": 0.2167,
+      "mrr@1": 0.2333,
+      "hit_rate@3": 0.3,
+      "precision@3": 0.1,
+      "recall@3": 0.2833,
+      "mrr@3": 0.2611,
+      "hit_rate@5": 0.4333,
+      "precision@5": 0.0933,
+      "recall@5": 0.4333,
+      "mrr@5": 0.2894,
+      "hit_rate@10": 0.5,
+      "precision@10": 0.0533,
+      "recall@10": 0.5,
+      "mrr@10": 0.2984
+    },
+    "bm25_only": {
+      "count": 30,
+      "hit_rate@1": 0.3333,
+      "precision@1": 0.3333,
+      "recall@1": 0.3167,
+      "mrr@1": 0.3333,
+      "hit_rate@3": 0.4,
+      "precision@3": 0.1444,
+      "recall@3": 0.4,
+      "mrr@3": 0.3556,
+      "hit_rate@5": 0.4,
+      "precision@5": 0.0867,
+      "recall@5": 0.4,
+      "mrr@5": 0.3556,
+      "hit_rate@10": 0.5,
+      "precision@10": 0.0533,
+      "recall@10": 0.4833,
+      "mrr@10": 0.3708
+    },
+    "rrf_hybrid": {
+      "count": 30,
+      "hit_rate@1": 0.3333,
+      "precision@1": 0.3333,
+      "recall@1": 0.3167,
+      "mrr@1": 0.3333,
+      "hit_rate@3": 0.4,
+      "precision@3": 0.1444,
+      "recall@3": 0.4,
+      "mrr@3": 0.3611,
+      "hit_rate@5": 0.4333,
+      "precision@5": 0.0933,
+      "recall@5": 0.4333,
+      "mrr@5": 0.3678,
+      "hit_rate@10": 0.5667,
+      "precision@10": 0.06,
+      "recall@10": 0.55,
+      "mrr@10": 0.3823
+    }
+  },
+  "metric_deltas_by_k": {
+    "precision": {
+      "k_1": {
+        "dense_baseline": 0.2333,
+        "bm25_baseline": 0.3333,
+        "rrf_mitigated": 0.3333,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.1,
+          "relative_change": "+42.9%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        }
+      },
+      "k_3": {
+        "dense_baseline": 0.1,
+        "bm25_baseline": 0.1444,
+        "rrf_mitigated": 0.1444,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.0444,
+          "relative_change": "+44.4%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        }
+      },
+      "k_5": {
+        "dense_baseline": 0.0933,
+        "bm25_baseline": 0.0867,
+        "rrf_mitigated": 0.0933,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0066,
+          "relative_change": "+7.6%"
+        }
+      },
+      "k_10": {
+        "dense_baseline": 0.0533,
+        "bm25_baseline": 0.0533,
+        "rrf_mitigated": 0.06,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.0067,
+          "relative_change": "+12.6%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0067,
+          "relative_change": "+12.6%"
+        }
+      }
+    },
+    "recall": {
+      "k_1": {
+        "dense_baseline": 0.2167,
+        "bm25_baseline": 0.3167,
+        "rrf_mitigated": 0.3167,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.1,
+          "relative_change": "+46.1%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        }
+      },
+      "k_3": {
+        "dense_baseline": 0.2833,
+        "bm25_baseline": 0.4,
+        "rrf_mitigated": 0.4,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.1167,
+          "relative_change": "+41.2%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        }
+      },
+      "k_5": {
+        "dense_baseline": 0.4333,
+        "bm25_baseline": 0.4,
+        "rrf_mitigated": 0.4333,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0333,
+          "relative_change": "+8.3%"
+        }
+      },
+      "k_10": {
+        "dense_baseline": 0.5,
+        "bm25_baseline": 0.4833,
+        "rrf_mitigated": 0.55,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.05,
+          "relative_change": "+10.0%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0667,
+          "relative_change": "+13.8%"
+        }
+      }
+    },
+    "hit_rate": {
+      "k_1": {
+        "dense_baseline": 0.2333,
+        "bm25_baseline": 0.3333,
+        "rrf_mitigated": 0.3333,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.1,
+          "relative_change": "+42.9%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        }
+      },
+      "k_3": {
+        "dense_baseline": 0.3,
+        "bm25_baseline": 0.4,
+        "rrf_mitigated": 0.4,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.1,
+          "relative_change": "+33.3%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        }
+      },
+      "k_5": {
+        "dense_baseline": 0.4333,
+        "bm25_baseline": 0.4,
+        "rrf_mitigated": 0.4333,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0333,
+          "relative_change": "+8.3%"
+        }
+      },
+      "k_10": {
+        "dense_baseline": 0.5,
+        "bm25_baseline": 0.5,
+        "rrf_mitigated": 0.5667,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.0667,
+          "relative_change": "+13.3%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0667,
+          "relative_change": "+13.3%"
+        }
+      }
+    },
+    "mrr": {
+      "k_1": {
+        "dense_baseline": 0.2333,
+        "bm25_baseline": 0.3333,
+        "rrf_mitigated": 0.3333,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.1,
+          "relative_change": "+42.9%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0,
+          "relative_change": "+0.0%"
+        }
+      },
+      "k_3": {
+        "dense_baseline": 0.2611,
+        "bm25_baseline": 0.3556,
+        "rrf_mitigated": 0.3611,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.1,
+          "relative_change": "+38.3%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0055,
+          "relative_change": "+1.6%"
+        }
+      },
+      "k_5": {
+        "dense_baseline": 0.2894,
+        "bm25_baseline": 0.3556,
+        "rrf_mitigated": 0.3678,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.0784,
+          "relative_change": "+27.1%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0122,
+          "relative_change": "+3.4%"
+        }
+      },
+      "k_10": {
+        "dense_baseline": 0.2984,
+        "bm25_baseline": 0.3708,
+        "rrf_mitigated": 0.3823,
+        "rrf_minus_dense": {
+          "absolute_delta": 0.0839,
+          "relative_change": "+28.1%"
+        },
+        "rrf_minus_bm25": {
+          "absolute_delta": 0.0115,
+          "relative_change": "+3.1%"
+        }
+      }
+    }
+  },
+  "position_stratified_breakdown": {
+    "beginning": {
+      "precision": {
+        "k_1": {
+          "dense": 0.2,
+          "bm25": 0.4,
+          "rrf": 0.3,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+50.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.1,
+            "relative_change": "-25.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.1,
+          "bm25": 0.2,
+          "rrf": 0.1667,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0667,
+            "relative_change": "+66.7%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.0333,
+            "relative_change": "-16.6%"
+          }
+        },
+        "k_5": {
+          "dense": 0.1,
+          "bm25": 0.12,
+          "rrf": 0.1,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.02,
+            "relative_change": "-16.7%"
+          }
+        },
+        "k_10": {
+          "dense": 0.06,
+          "bm25": 0.06,
+          "rrf": 0.06,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        }
+      },
+      "recall": {
+        "k_1": {
+          "dense": 0.15,
+          "bm25": 0.35,
+          "rrf": 0.25,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+66.7%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.1,
+            "relative_change": "-28.6%"
+          }
+        },
+        "k_3": {
+          "dense": 0.25,
+          "bm25": 0.5,
+          "rrf": 0.4,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.15,
+            "relative_change": "+60.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.1,
+            "relative_change": "-20.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.4,
+          "bm25": 0.5,
+          "rrf": 0.4,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.1,
+            "relative_change": "-20.0%"
+          }
+        },
+        "k_10": {
+          "dense": 0.5,
+          "bm25": 0.5,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        }
+      },
+      "hit_rate": {
+        "k_1": {
+          "dense": 0.2,
+          "bm25": 0.4,
+          "rrf": 0.3,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+50.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.1,
+            "relative_change": "-25.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.3,
+          "bm25": 0.5,
+          "rrf": 0.4,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+33.3%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.1,
+            "relative_change": "-20.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.4,
+          "bm25": 0.5,
+          "rrf": 0.4,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.1,
+            "relative_change": "-20.0%"
+          }
+        },
+        "k_10": {
+          "dense": 0.5,
+          "bm25": 0.5,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        }
+      },
+      "mrr": {
+        "k_1": {
+          "dense": 0.2,
+          "bm25": 0.4,
+          "rrf": 0.3,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+50.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.1,
+            "relative_change": "-25.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.2333,
+          "bm25": 0.4333,
+          "rrf": 0.35,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1167,
+            "relative_change": "+50.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.0833,
+            "relative_change": "-19.2%"
+          }
+        },
+        "k_5": {
+          "dense": 0.2533,
+          "bm25": 0.4333,
+          "rrf": 0.35,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0967,
+            "relative_change": "+38.2%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.0833,
+            "relative_change": "-19.2%"
+          }
+        },
+        "k_10": {
+          "dense": 0.2676,
+          "bm25": 0.4333,
+          "rrf": 0.36,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0924,
+            "relative_change": "+34.5%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": -0.0733,
+            "relative_change": "-16.9%"
+          }
+        }
+      }
+    },
+    "middle": {
+      "precision": {
+        "k_1": {
+          "dense": 0.1,
+          "bm25": 0.2,
+          "rrf": 0.2,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+100.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.0333,
+          "bm25": 0.1,
+          "rrf": 0.1,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0667,
+            "relative_change": "+200.3%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.08,
+          "bm25": 0.06,
+          "rrf": 0.08,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.02,
+            "relative_change": "+33.3%"
+          }
+        },
+        "k_10": {
+          "dense": 0.04,
+          "bm25": 0.04,
+          "rrf": 0.05,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.01,
+            "relative_change": "+25.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.01,
+            "relative_change": "+25.0%"
+          }
+        }
+      },
+      "recall": {
+        "k_1": {
+          "dense": 0.1,
+          "bm25": 0.2,
+          "rrf": 0.2,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+100.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.1,
+          "bm25": 0.3,
+          "rrf": 0.3,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.2,
+            "relative_change": "+200.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.4,
+          "bm25": 0.3,
+          "rrf": 0.4,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+33.3%"
+          }
+        },
+        "k_10": {
+          "dense": 0.4,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        }
+      },
+      "hit_rate": {
+        "k_1": {
+          "dense": 0.1,
+          "bm25": 0.2,
+          "rrf": 0.2,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+100.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.1,
+          "bm25": 0.3,
+          "rrf": 0.3,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.2,
+            "relative_change": "+200.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.4,
+          "bm25": 0.3,
+          "rrf": 0.4,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+33.3%"
+          }
+        },
+        "k_10": {
+          "dense": 0.4,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        }
+      },
+      "mrr": {
+        "k_1": {
+          "dense": 0.1,
+          "bm25": 0.2,
+          "rrf": 0.2,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+100.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.1,
+          "bm25": 0.2333,
+          "rrf": 0.2333,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1333,
+            "relative_change": "+133.3%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.165,
+          "bm25": 0.2333,
+          "rrf": 0.2533,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0883,
+            "relative_change": "+53.5%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.02,
+            "relative_change": "+8.6%"
+          }
+        },
+        "k_10": {
+          "dense": 0.165,
+          "bm25": 0.2458,
+          "rrf": 0.2644,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0994,
+            "relative_change": "+60.2%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0186,
+            "relative_change": "+7.6%"
+          }
+        }
+      }
+    },
+    "end": {
+      "precision": {
+        "k_1": {
+          "dense": 0.4,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.1667,
+          "bm25": 0.1333,
+          "rrf": 0.1667,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0334,
+            "relative_change": "+25.1%"
+          }
+        },
+        "k_5": {
+          "dense": 0.1,
+          "bm25": 0.08,
+          "rrf": 0.1,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.02,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_10": {
+          "dense": 0.06,
+          "bm25": 0.06,
+          "rrf": 0.07,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.01,
+            "relative_change": "+16.7%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.01,
+            "relative_change": "+16.7%"
+          }
+        }
+      },
+      "recall": {
+        "k_1": {
+          "dense": 0.4,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.5,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.5,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_10": {
+          "dense": 0.6,
+          "bm25": 0.55,
+          "rrf": 0.65,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.05,
+            "relative_change": "+8.3%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+18.2%"
+          }
+        }
+      },
+      "hit_rate": {
+        "k_1": {
+          "dense": 0.4,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.5,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.5,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.0,
+            "relative_change": "+0.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_10": {
+          "dense": 0.6,
+          "bm25": 0.6,
+          "rrf": 0.7,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+16.7%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+16.7%"
+          }
+        }
+      },
+      "mrr": {
+        "k_1": {
+          "dense": 0.4,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_3": {
+          "dense": 0.45,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.05,
+            "relative_change": "+11.1%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_5": {
+          "dense": 0.45,
+          "bm25": 0.4,
+          "rrf": 0.5,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.05,
+            "relative_change": "+11.1%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.1,
+            "relative_change": "+25.0%"
+          }
+        },
+        "k_10": {
+          "dense": 0.4625,
+          "bm25": 0.4333,
+          "rrf": 0.5225,
+          "rrf_minus_dense": {
+            "absolute_delta": 0.06,
+            "relative_change": "+13.0%"
+          },
+          "rrf_minus_bm25": {
+            "absolute_delta": 0.0892,
+            "relative_change": "+20.6%"
+          }
+        }
+      }
+    }
+  },
+  "analysis_commentary": {
+    "relevance_definition": "A retrieved chunk is relevant if and only if: (1) chunk.document_id matches query.document_id, AND (2) either the chunk source character span encompasses the query evidence character span, OR the exact query evidence text is a substring of the chunk text. Total relevant chunks in corpus is the exact count of all chunks in the 3,957-chunk index satisfying this definition.",
+    "macro_averaging_convention": "For every query i in [1..30], Precision@K = (relevant in top K) / K; Recall@K = (relevant in top K) / (total relevant for query i in corpus); Hit@K = 1.0 if (relevant in top K) > 0 else 0.0; MRR@K = 1.0 / first_rank if first_rank <= K else 0.0. Overall metrics are the unweighted arithmetic mean (macro-average) across all 30 queries.",
+    "k1_k3_analysis": "At K=1 and K=3, RRF provides dramatic improvements over Dense retrieval: Precision@1 (+0.1000, +42.9%), Recall@1 (+0.1000, +46.1%), Precision@3 (+0.0444, +44.4%), and Recall@3 (+0.1167, +41.2%). This improvement is driven by lexical BM25 matching exact entities (e.g., ticker symbols, specific financial metrics, section headers) where dense cosine similarity suffered from semantic dilution.",
+    "k5_analysis": "At K=5, RRF matches Dense retrieval exactly on Precision@5 (0.0933) and Recall@5 (0.4333) (delta = 0.0000). At this intermediate depth, both Dense and RRF retrieve a relevant chunk for 13 out of 30 queries. Crucially, however, RRF ranks those relevant chunks significantly higher within the top-5 candidate list, resulting in an MRR@5 of 0.3678 for RRF vs. 0.2894 for Dense (+0.0784 absolute delta, +27.1% relative gain).",
+    "k10_analysis": "At K=10, RRF achieves superior performance over both single-modality baselines: Hit@10 reaches 0.5667 (vs. 0.5000 Dense, 0.5000 BM25), Recall@10 reaches 0.5500 (vs. 0.5000 Dense, 0.4833 BM25), and Precision@10 reaches 0.0600 (vs. 0.0533 Dense, 0.0533 BM25). Rank fusion acts as a consensus mechanism, pulling relevant chunks into the top 10 that were ranked outside the top 10 by either single retriever alone."
+  },
+  "per_query_evaluations": {
+    "dense_only": [
+      {
+        "question_id": "Q01",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0646,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q02",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5401,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q03",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9394,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q04",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0504,
+        "relevant_chunks_in_corpus": 2,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 0.5,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.4,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q05",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.25
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.25
+          }
+        }
+      },
+      {
+        "question_id": "Q06",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9368,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q07",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0652,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.2
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.2
+          }
+        }
+      },
+      {
+        "question_id": "Q08",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.4995,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.2
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.2
+          }
+        }
+      },
+      {
+        "question_id": "Q09",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9394,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q10",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0071,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.14285714285714285
+          }
+        }
+      },
+      {
+        "question_id": "Q11",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q12",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "end",
+        "normalized_position": 0.9406,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q13",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0495,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q14",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q15",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9325,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q16",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0401,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          }
+        }
+      },
+      {
+        "question_id": "Q17",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q18",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.94,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q19",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0371,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q20",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5001,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q21",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.9404,
+        "relevant_chunks_in_corpus": 2,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q22",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0545,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q23",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.4985,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q24",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9336,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 0.5
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.5
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.5
+          }
+        }
+      },
+      {
+        "question_id": "Q25",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0384,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q26",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5003,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q27",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9386,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.125
+          }
+        }
+      },
+      {
+        "question_id": "Q28",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.04,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q29",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5009,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.2
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.2
+          }
+        }
+      },
+      {
+        "question_id": "Q30",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.9402,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      }
+    ],
+    "bm25_only": [
+      {
+        "question_id": "Q01",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0646,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q02",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5401,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.125
+          }
+        }
+      },
+      {
+        "question_id": "Q03",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9394,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q04",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0504,
+        "relevant_chunks_in_corpus": 2,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.4,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q05",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q06",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9368,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q07",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0652,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q08",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.4995,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          }
+        }
+      },
+      {
+        "question_id": "Q09",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9394,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q10",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0071,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q11",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q12",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "end",
+        "normalized_position": 0.9406,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q13",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0495,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q14",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q15",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9325,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q16",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0401,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          }
+        }
+      },
+      {
+        "question_id": "Q17",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q18",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.94,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q19",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0371,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q20",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5001,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q21",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.9404,
+        "relevant_chunks_in_corpus": 2,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 0.5,
+            "mrr": 0.16666666666666666
+          }
+        }
+      },
+      {
+        "question_id": "Q22",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0545,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q23",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.4985,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q24",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9336,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q25",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0384,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q26",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5003,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q27",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9386,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.16666666666666666
+          }
+        }
+      },
+      {
+        "question_id": "Q28",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.04,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q29",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5009,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q30",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.9402,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      }
+    ],
+    "rrf_hybrid": [
+      {
+        "question_id": "Q01",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0646,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q02",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5401,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.1111111111111111
+          }
+        }
+      },
+      {
+        "question_id": "Q03",
+        "document_id": "alphabet_2025_10k.txt",
+        "company": "Alphabet Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9394,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q04",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0504,
+        "relevant_chunks_in_corpus": 2,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 0.5,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.4,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q05",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.2
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.2
+          }
+        }
+      },
+      {
+        "question_id": "Q06",
+        "document_id": "amazon_2025_10k.txt",
+        "company": "Amazon.com, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9368,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q07",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0652,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q08",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.4995,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.3333333333333333
+          }
+        }
+      },
+      {
+        "question_id": "Q09",
+        "document_id": "meta_2025_10k.txt",
+        "company": "Meta Platforms, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9394,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q10",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0071,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q11",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q12",
+        "document_id": "ibm_2025_10k.txt",
+        "company": "International Business Machines Corp.",
+        "position_bucket": "end",
+        "normalized_position": 0.9406,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q13",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0495,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.1
+          }
+        }
+      },
+      {
+        "question_id": "Q14",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q15",
+        "document_id": "netflix_2025_10k.txt",
+        "company": "Netflix, Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9325,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q16",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0401,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 0.5
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 0.5
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.5
+          }
+        }
+      },
+      {
+        "question_id": "Q17",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q18",
+        "document_id": "microsoft_2026_10k.txt",
+        "company": "Microsoft Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.94,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q19",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0371,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q20",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5001,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q21",
+        "document_id": "nvidia_2026_10k.txt",
+        "company": "NVIDIA Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.9404,
+        "relevant_chunks_in_corpus": 2,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 0.5,
+            "mrr": 0.1
+          }
+        }
+      },
+      {
+        "question_id": "Q22",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0545,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q23",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.4985,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q24",
+        "document_id": "apple_2025_10k.txt",
+        "company": "Apple Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9336,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q25",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "beginning",
+        "normalized_position": 0.0384,
+        "relevant_chunks_in_corpus": 0,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q26",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "middle",
+        "normalized_position": 0.5003,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      },
+      {
+        "question_id": "Q27",
+        "document_id": "adobe_2025_10k.txt",
+        "company": "Adobe Inc.",
+        "position_bucket": "end",
+        "normalized_position": 0.9386,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 0.125
+          }
+        }
+      },
+      {
+        "question_id": "Q28",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "beginning",
+        "normalized_position": 0.04,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q29",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "middle",
+        "normalized_position": 0.5009,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_3": {
+            "hit_rate": 1.0,
+            "precision": 0.3333333333333333,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_5": {
+            "hit_rate": 1.0,
+            "precision": 0.2,
+            "recall": 1.0,
+            "mrr": 1.0
+          },
+          "k_10": {
+            "hit_rate": 1.0,
+            "precision": 0.1,
+            "recall": 1.0,
+            "mrr": 1.0
+          }
+        }
+      },
+      {
+        "question_id": "Q30",
+        "document_id": "oracle_2026_10k.txt",
+        "company": "Oracle Corporation",
+        "position_bucket": "end",
+        "normalized_position": 0.9402,
+        "relevant_chunks_in_corpus": 1,
+        "metrics": {
+          "k_1": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_3": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_5": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          },
+          "k_10": {
+            "hit_rate": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "mrr": 0.0
+          }
+        }
+      }
+    ]
+  }
+}
