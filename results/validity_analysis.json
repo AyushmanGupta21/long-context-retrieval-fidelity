@@ -1,0 +1,1550 @@
+{
+  "benchmark_metadata": {
+    "confidence_level": 0.95,
+    "multiple_testing": {
+      "bonferroni_adjusted_threshold_15_tests": 0.003333,
+      "bonferroni_adjusted_threshold_4_metrics": 0.0125,
+      "headline_status": "No multiple-comparison correction applied to headline numbers.",
+      "total_comparisons_run": 15
+    },
+    "n_bootstrap_resamples": 10000,
+    "name": "Long-Context SEC 10-K Retrieval Fidelity Benchmark Validity Analysis",
+    "scope": "exploratory: 30 queries, 10 per position bucket",
+    "seed": 42
+  },
+  "confound_analysis": {
+    "finding_1_table_share": "Middle and End buckets each contain exactly 4 of 10 table queries (40% table share each). Table share alone cannot explain the Middle-vs-End performance gap.",
+    "finding_2_narrative_position": "Within narrative evidence, Middle Dense MRR@10 (0.2333, n=6) is not below Beginning Dense MRR@10 (0.1917, n=8). The benchmark shows no evidence of a position degradation within narrative text at this sample size.",
+    "finding_3_cell_sizes": "Cross-tabulation cells contain small counts (n=2 to 8 queries), which cannot separate position effects from content type with statistical confidence.",
+    "finding_4_end_narrative_outlier": "End Narrative exhibits an unusually high Dense MRR@10 of 0.6875 (n=6). 4 of the 6 queries (Q03, Q06, Q09, Q18) achieved rank 1 (MRR=1.0000) under Dense search alone because they query distinctive statutory, regulatory, and auditor oversight disclosures (Alphabet insider trading policy, Amazon PCAOB audit standards, Meta IRS/Irish tax years, Microsoft Section 16(a) reports) that face minimal lexical or semantic competition in the corpus. The End bucket's strength is at least partly a query-selection effect, and the Middle-vs-End gap cannot be attributed to position.",
+    "headline_conclusion": "Content type is a strong confound on difficulty (tables 0.1893 MRR vs narrative 0.3529 MRR for Dense), and sub-cell counts are too small to isolate position after controlling for it. The data does not support a causal position effect."
+  },
+  "content_type_cross_tabulation": [
+    {
+      "bm25_hit@5": 0.5,
+      "bm25_mrr@10": 0.4167,
+      "content_type": "Narrative/Prose",
+      "count": 8,
+      "dense_hit@5": 0.375,
+      "dense_mrr@10": 0.1917,
+      "position_bucket": "beginning",
+      "rrf_hit@5": 0.375,
+      "rrf_mrr@10": 0.325
+    },
+    {
+      "bm25_hit@5": 0.5,
+      "bm25_mrr@10": 0.5,
+      "content_type": "Table/Numeric",
+      "count": 2,
+      "dense_hit@5": 0.5,
+      "dense_mrr@10": 0.5714,
+      "position_bucket": "beginning",
+      "rrf_hit@5": 0.5,
+      "rrf_mrr@10": 0.5
+    },
+    {
+      "bm25_hit@5": 0.5,
+      "bm25_mrr@10": 0.3889,
+      "content_type": "Narrative/Prose",
+      "count": 6,
+      "dense_hit@5": 0.5,
+      "dense_mrr@10": 0.2333,
+      "position_bucket": "middle",
+      "rrf_hit@5": 0.5,
+      "rrf_mrr@10": 0.3889
+    },
+    {
+      "bm25_hit@5": 0.0,
+      "bm25_mrr@10": 0.0312,
+      "content_type": "Table/Numeric",
+      "count": 4,
+      "dense_hit@5": 0.25,
+      "dense_mrr@10": 0.0625,
+      "position_bucket": "middle",
+      "rrf_hit@5": 0.25,
+      "rrf_mrr@10": 0.0778
+    },
+    {
+      "bm25_hit@5": 0.5,
+      "bm25_mrr@10": 0.5278,
+      "content_type": "Narrative/Prose",
+      "count": 6,
+      "dense_hit@5": 0.6667,
+      "dense_mrr@10": 0.6875,
+      "position_bucket": "end",
+      "rrf_hit@5": 0.6667,
+      "rrf_mrr@10": 0.6875
+    },
+    {
+      "bm25_hit@5": 0.25,
+      "bm25_mrr@10": 0.2917,
+      "content_type": "Table/Numeric",
+      "count": 4,
+      "dense_hit@5": 0.25,
+      "dense_mrr@10": 0.125,
+      "position_bucket": "end",
+      "rrf_hit@5": 0.25,
+      "rrf_mrr@10": 0.275
+    }
+  ],
+  "content_type_marginals": [
+    {
+      "bm25_hit@5": 0.5,
+      "bm25_mrr@10": 0.4417,
+      "content_type": "Narrative/Prose",
+      "count": 20,
+      "dense_hit@5": 0.5,
+      "dense_mrr@10": 0.3529,
+      "rrf_hit@5": 0.5,
+      "rrf_mrr@10": 0.4529
+    },
+    {
+      "bm25_hit@5": 0.2,
+      "bm25_mrr@10": 0.2292,
+      "content_type": "Table/Numeric",
+      "count": 10,
+      "dense_hit@5": 0.3,
+      "dense_mrr@10": 0.1893,
+      "rrf_hit@5": 0.3,
+      "rrf_mrr@10": 0.2411
+    }
+  ],
+  "model_and_tokenization_specifications": {
+    "chunk_token_distribution": {
+      "count_above_128": 3815,
+      "count_above_192": 0,
+      "count_above_254": 0,
+      "max": 192.0,
+      "mean": 171.9,
+      "min": 25.0,
+      "p25": 164.0,
+      "p50_median": 177.0,
+      "p75": 186.0,
+      "p90": 190.0,
+      "p95": 192.0,
+      "share_above_128": 0.9641,
+      "total_chunks": 3957
+    },
+    "hypothesis_framing": {
+      "chunk_length_counter_evidence": "Fixed-96 chunks (mean 95.9 tokens, strictly below the 128-token fine-tuning horizon) achieved lower Hit@10 (0.3000) and MRR@10 (0.1946) than fixed-192 chunks (Hit@10 0.4000, MRR@10 0.2296). Therefore, chunk length relative to training sequence length alone does not explain retrieval performance.",
+      "late_tokens_attenuation_hypothesis": "The premise that late tokens (positions 128 to 192) in chunks exceeding 128 tokens are represented less reliably is an untested exploratory hypothesis, not an established empirical finding."
+    },
+    "max_content_tokens_src_chunking_py": 254,
+    "max_position_embeddings_transformer_config": 512,
+    "max_seq_length_sentence_bert_config": 256,
+    "max_seq_length_src_embeddings_py": 256,
+    "model_architecture": "sentence-transformers/all-MiniLM-L6-v2 (6 layers, 384 dimensions)",
+    "model_card_fine_tuning_sequence_length": {
+      "context": "Fine-tuning was conducted on 1B+ sentence pairs using AdamW on TPU v3-8.",
+      "sentence": "The sequence length was limited to 128 tokens.",
+      "source_file": "huggingface_hub/sentence-transformers--all-MiniLM-L6-v2/README.md"
+    },
+    "sentence_aware_target_tokens": 192,
+    "tokenization_reconciliation": {
+      "bm25_alphanumeric_regex_avgdl": 123.1,
+      "explanation": "BM25 tokenizes using '\\b[a-zA-Z0-9_]+\\b', ignoring punctuation and formatting pipes, yielding avgdl=123.10 tokens. HuggingFace WordPiece tokenizes subwords and punctuation, yielding 171.90 mean tokens. Whitespace word count is 140.11.",
+      "huggingface_wordpiece_mean": 171.9,
+      "whitespace_word_mean": 140.11
+    }
+  },
+  "paired_comparisons": {
+    "bm25_vs_dense": {
+      "hit@1": {
+        "bm25_mean": 0.3333,
+        "bootstrap_95_ci": [
+          -0.0333,
+          0.2333
+        ],
+        "delta": 0.1,
+        "dense_mean": 0.2333,
+        "mcnemar_discordant_pairs": {
+          "bm25+/dense-": 4,
+          "bm25-/dense+": 1
+        },
+        "mcnemar_exact_p_value": 0.375,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@10": {
+        "bm25_mean": 0.5,
+        "bootstrap_95_ci": [
+          -0.1667,
+          0.1667
+        ],
+        "delta": 0.0,
+        "dense_mean": 0.5,
+        "mcnemar_discordant_pairs": {
+          "bm25+/dense-": 3,
+          "bm25-/dense+": 3
+        },
+        "mcnemar_exact_p_value": 1.0,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@3": {
+        "bm25_mean": 0.4,
+        "bootstrap_95_ci": [
+          -0.0333,
+          0.2333
+        ],
+        "delta": 0.1,
+        "dense_mean": 0.3,
+        "mcnemar_discordant_pairs": {
+          "bm25+/dense-": 4,
+          "bm25-/dense+": 1
+        },
+        "mcnemar_exact_p_value": 0.375,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@5": {
+        "bm25_mean": 0.4,
+        "bootstrap_95_ci": [
+          -0.1667,
+          0.0667
+        ],
+        "delta": -0.0333,
+        "dense_mean": 0.4333,
+        "mcnemar_discordant_pairs": {
+          "bm25+/dense-": 1,
+          "bm25-/dense+": 2
+        },
+        "mcnemar_exact_p_value": 1.0,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "mrr@10": {
+        "bm25_mean": 0.3708,
+        "bootstrap_95_ci": [
+          -0.0456,
+          0.1975
+        ],
+        "delta": 0.0725,
+        "dense_mean": 0.2984,
+        "differences_breakdown": {
+          "negative": 3,
+          "positive": 8,
+          "tie_percentage": 63.3,
+          "total_pairs": 30,
+          "zero_ties": 19
+        },
+        "sign_test_exact_p_value": 0.2266,
+        "statistically_distinguishable_at_sample_size": false,
+        "wilcoxon_asymptotic_p_uncorrected": null,
+        "wilcoxon_asymptotic_w": null,
+        "wilcoxon_tie_warning": "Wilcoxon test discards 20 tied pairs (66.7%) and ranks only 10 discordant pairs; normal approximation is sensitive and unreliable."
+      }
+    },
+    "rrf_vs_bm25": {
+      "hit@1": {
+        "bm25_mean": 0.3333,
+        "bootstrap_95_ci": [
+          -0.1,
+          0.1
+        ],
+        "delta": 0.0,
+        "mcnemar_discordant_pairs": {
+          "rrf+/bm25-": 1,
+          "rrf-/bm25+": 1
+        },
+        "mcnemar_exact_p_value": 1.0,
+        "rrf_mean": 0.3333,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@10": {
+        "bm25_mean": 0.5,
+        "bootstrap_95_ci": [
+          0.0,
+          0.1667
+        ],
+        "delta": 0.0667,
+        "mcnemar_discordant_pairs": {
+          "rrf+/bm25-": 2,
+          "rrf-/bm25+": 0
+        },
+        "mcnemar_exact_p_value": 0.5,
+        "rrf_mean": 0.5667,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@3": {
+        "bm25_mean": 0.4,
+        "bootstrap_95_ci": [
+          -0.1,
+          0.1
+        ],
+        "delta": 0.0,
+        "mcnemar_discordant_pairs": {
+          "rrf+/bm25-": 1,
+          "rrf-/bm25+": 1
+        },
+        "mcnemar_exact_p_value": 1.0,
+        "rrf_mean": 0.4,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@5": {
+        "bm25_mean": 0.4,
+        "bootstrap_95_ci": [
+          -0.0667,
+          0.1667
+        ],
+        "delta": 0.0333,
+        "mcnemar_discordant_pairs": {
+          "rrf+/bm25-": 2,
+          "rrf-/bm25+": 1
+        },
+        "mcnemar_exact_p_value": 1.0,
+        "rrf_mean": 0.4333,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "mrr@10": {
+        "bm25_mean": 0.3708,
+        "bootstrap_95_ci": [
+          -0.082,
+          0.1046
+        ],
+        "delta": 0.0115,
+        "differences_breakdown": {
+          "negative": 4,
+          "positive": 3,
+          "tie_percentage": 76.7,
+          "total_pairs": 30,
+          "zero_ties": 23
+        },
+        "rrf_mean": 0.3823,
+        "sign_test_exact_p_value": 1.0,
+        "statistically_distinguishable_at_sample_size": false,
+        "wilcoxon_asymptotic_p_uncorrected": null,
+        "wilcoxon_asymptotic_w": null,
+        "wilcoxon_tie_warning": "Wilcoxon test discards 20 tied pairs (66.7%) and ranks only 10 discordant pairs; normal approximation is sensitive and unreliable."
+      }
+    },
+    "rrf_vs_dense": {
+      "hit@1": {
+        "bootstrap_95_ci": [
+          0.0,
+          0.2
+        ],
+        "delta": 0.1,
+        "dense_mean": 0.2333,
+        "mcnemar_discordant_pairs": {
+          "rrf+/dense-": 3,
+          "rrf-/dense+": 0
+        },
+        "mcnemar_exact_p_value": 0.25,
+        "rrf_mean": 0.3333,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@10": {
+        "bootstrap_95_ci": [
+          -0.0667,
+          0.2
+        ],
+        "delta": 0.0667,
+        "dense_mean": 0.5,
+        "mcnemar_discordant_pairs": {
+          "rrf+/dense-": 3,
+          "rrf-/dense+": 1
+        },
+        "mcnemar_exact_p_value": 0.625,
+        "rrf_mean": 0.5667,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@3": {
+        "bootstrap_95_ci": [
+          0.0,
+          0.2
+        ],
+        "delta": 0.1,
+        "dense_mean": 0.3,
+        "mcnemar_discordant_pairs": {
+          "rrf+/dense-": 3,
+          "rrf-/dense+": 0
+        },
+        "mcnemar_exact_p_value": 0.25,
+        "rrf_mean": 0.4,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "hit@5": {
+        "bootstrap_95_ci": [
+          0.0,
+          0.0
+        ],
+        "delta": 0.0,
+        "dense_mean": 0.4333,
+        "mcnemar_discordant_pairs": {
+          "rrf+/dense-": 0,
+          "rrf-/dense+": 0
+        },
+        "mcnemar_exact_p_value": 1.0,
+        "rrf_mean": 0.4333,
+        "statistically_distinguishable_at_sample_size": false
+      },
+      "mrr@10": {
+        "bootstrap_95_ci": [
+          0.0169,
+          0.1676
+        ],
+        "delta": 0.0839,
+        "dense_mean": 0.2984,
+        "differences_breakdown": {
+          "negative": 2,
+          "positive": 8,
+          "tie_percentage": 66.7,
+          "total_pairs": 30,
+          "zero_ties": 20
+        },
+        "rrf_mean": 0.3823,
+        "sign_test_exact_p_value": 0.1094,
+        "statistically_distinguishable_at_sample_size": false,
+        "wilcoxon_asymptotic_p_uncorrected": 0.0472,
+        "wilcoxon_asymptotic_w": 47.0,
+        "wilcoxon_tie_warning": "Wilcoxon test discards 20 tied pairs (66.7%) and ranks only 10 discordant pairs; normal approximation is sensitive and unreliable."
+      }
+    }
+  },
+  "per_bucket_confidence_intervals": {
+    "beginning": {
+      "bm25": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.2,
+            0.8
+          ],
+          "mean": 0.5
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.1333,
+            0.7333
+          ],
+          "mean": 0.4333
+        }
+      },
+      "dense": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.1,
+            0.7
+          ],
+          "mean": 0.4
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.0533,
+            0.5333
+          ],
+          "mean": 0.2676
+        }
+      },
+      "query_count": 10,
+      "rrf": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.1,
+            0.7
+          ],
+          "mean": 0.4
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.11,
+            0.65
+          ],
+          "mean": 0.36
+        }
+      }
+    },
+    "end": {
+      "bm25": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.1,
+            0.7
+          ],
+          "mean": 0.4
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.15,
+            0.7167
+          ],
+          "mean": 0.4333
+        }
+      },
+      "dense": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.2,
+            0.8
+          ],
+          "mean": 0.5
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.175,
+            0.75
+          ],
+          "mean": 0.4625
+        }
+      },
+      "query_count": 10,
+      "rrf": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.2,
+            0.8
+          ],
+          "mean": 0.5
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.23,
+            0.8125
+          ],
+          "mean": 0.5225
+        }
+      }
+    },
+    "middle": {
+      "bm25": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.0,
+            0.6
+          ],
+          "mean": 0.3
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.0333,
+            0.5
+          ],
+          "mean": 0.2458
+        }
+      },
+      "dense": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.1,
+            0.7
+          ],
+          "mean": 0.4
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.02,
+            0.37
+          ],
+          "mean": 0.165
+        }
+      },
+      "query_count": 10,
+      "rrf": {
+        "hit@5": {
+          "bootstrap_95_ci": [
+            0.1,
+            0.7
+          ],
+          "mean": 0.4
+        },
+        "mrr@10": {
+          "bootstrap_95_ci": [
+            0.0533,
+            0.52
+          ],
+          "mean": 0.2644
+        }
+      }
+    }
+  },
+  "per_query_classification": [
+    {
+      "answer": "Our moonshot factory focused on developing breakthrough technologies.",
+      "company": "Alphabet Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "alphabet_2025_10k.txt",
+      "evidence_snippet": "Across Alphabet, we are also using technology to try to solve big problems that affect a wide variet...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.0646,
+      "position_bucket": "beginning",
+      "question": "What is the primary role of X within Alphabet's portfolio of Other Bets?",
+      "question_id": "Q01"
+    },
+    {
+      "answer": "$83,240 million",
+      "company": "Alphabet Inc.",
+      "content_type": "Table/Numeric",
+      "document_id": "alphabet_2025_10k.txt",
+      "evidence_snippet": "| Maturities and sales of marketable securities | 86,672 | | | 103,428 | | | 83,240 | |",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.125
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.1111111111111111
+        }
+      },
+      "normalized_position": 0.5401,
+      "position_bucket": "middle",
+      "question": "According to Alphabet's cash flow statement, what were the maturities and sales of marketable securities in 2025 (in millions)?",
+      "question_id": "Q02"
+    },
+    {
+      "answer": "Prohibited from trading in securities while in possession of material, nonpublic information.",
+      "company": "Alphabet Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "alphabet_2025_10k.txt",
+      "evidence_snippet": "and procedures governing the purchase, sale, and other dispositions of securities of Alphabet by dir...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.9394,
+      "position_bucket": "end",
+      "question": "Under Alphabet's insider trading policy, what are directors, officers, and employees prohibited from doing?",
+      "question_id": "Q03"
+    },
+    {
+      "answer": "Executive Chair, age 62.",
+      "company": "Amazon.com, Inc.",
+      "content_type": "Table/Numeric",
+      "document_id": "amazon_2025_10k.txt",
+      "evidence_snippet": "| Jeffrey P. Bezos | | 62 | | Executive Chair |",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.0504,
+      "position_bucket": "beginning",
+      "question": "What position and age are reported for Jeffrey P. Bezos in Amazon's executive officers disclosure?",
+      "question_id": "Q04"
+    },
+    {
+      "answer": "$250,536 million as of December 31, 2025, compared to $172,866 million in 2024.",
+      "company": "Amazon.com, Inc.",
+      "content_type": "Table/Numeric",
+      "document_id": "amazon_2025_10k.txt",
+      "evidence_snippet": "| Retained earnings | 172,866 | | | 250,536 | |",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.25
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.2
+        }
+      },
+      "normalized_position": 0.5,
+      "position_bucket": "middle",
+      "question": "According to Amazon's consolidated balance sheets, what were retained earnings as of December 31, 2025 compared to 2024 (in millions)?",
+      "question_id": "Q05"
+    },
+    {
+      "answer": "Standards of the Public Company Accounting Oversight Board (United States) (PCAOB).",
+      "company": "Amazon.com, Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "amazon_2025_10k.txt",
+      "evidence_snippet": "We also have audited, in accordance with the standards of the Public Company Accounting Oversight Bo...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.9368,
+      "position_bucket": "end",
+      "question": "In accordance with what professional oversight standards was Amazon's financial audit conducted?",
+      "question_id": "Q06"
+    },
+    {
+      "answer": "78,865 employees.",
+      "company": "Meta Platforms, Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "meta_2025_10k.txt",
+      "evidence_snippet": "We had a global workforce of 78,865 employees as of December\u00a031, 2025, and we have offices in more t...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.2
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.0652,
+      "position_bucket": "beginning",
+      "question": "How many employees comprised Meta's global workforce as of December 31, 2025?",
+      "question_id": "Q07"
+    },
+    {
+      "answer": "Kadrey, et al. v. Meta Platforms, Inc.",
+      "company": "Meta Platforms, Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "meta_2025_10k.txt",
+      "evidence_snippet": "Kadrey, et al. v. Meta Platforms, Inc., Chabon, et al. v. Meta Platforms, Inc. and Farnsworth v. Met...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.3333333333333333
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.2
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.3333333333333333
+        }
+      },
+      "normalized_position": 0.4995,
+      "position_bucket": "middle",
+      "question": "What is the name of the consolidated copyright lawsuit against Meta involving author copyright claims in the Northern District of California?",
+      "question_id": "Q08"
+    },
+    {
+      "answer": "2020 and subsequent tax years by the IRS, and 2021 and subsequent tax years by the Irish Revenue Commissioners.",
+      "company": "Meta Platforms, Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "meta_2025_10k.txt",
+      "evidence_snippet": "We are subject to taxation in the United States and various other state and foreign jurisdictions. T...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.9394,
+      "position_bucket": "end",
+      "question": "Which tax years for Meta remain open to examination by the IRS and Irish Revenue Commissioners?",
+      "question_id": "Q09"
+    },
+    {
+      "answer": "Trading symbol IBM on the New York Stock Exchange.",
+      "company": "International Business Machines Corp.",
+      "content_type": "Table/Numeric",
+      "document_id": "ibm_2025_10k.txt",
+      "evidence_snippet": "| Capital stock, par value $.20 per share | | IBM | | New York Stock Exchange |",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.14285714285714285
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.0071,
+      "position_bucket": "beginning",
+      "question": "Under securities registered pursuant to Section 12(b), what trading symbol and stock exchange are listed for IBM capital stock?",
+      "question_id": "Q10"
+    },
+    {
+      "answer": "By relying on tools licensed from third party security vendors and periodically engaging third parties.",
+      "company": "International Business Machines Corp.",
+      "content_type": "Narrative/Prose",
+      "document_id": "ibm_2025_10k.txt",
+      "evidence_snippet": "We also rely on tools licensed from third party security vendors to monitor and manage cybersecurity...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.5,
+      "position_bucket": "middle",
+      "question": "How does IBM monitor and manage its cybersecurity risks?",
+      "question_id": "Q11"
+    },
+    {
+      "answer": "Certification pursuant to Rule 13A-14(a) or 15D-14(a) of the Securities Exchange Act of 1934, as Adopted Pursuant to Section 302 of the Sarbanes-Oxley Act of 2002.",
+      "company": "International Business Machines Corp.",
+      "content_type": "Table/Numeric",
+      "document_id": "ibm_2025_10k.txt",
+      "evidence_snippet": "| | | Certification by CFO pursuant to Rule 13A-14(a) or 15D-14(a) of the Securities Exchange Act of...",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.9406,
+      "position_bucket": "end",
+      "question": "Under Exhibit 31.2, what certification was provided by IBM's Chief Financial Officer?",
+      "question_id": "Q12"
+    },
+    {
+      "answer": "At least annually.",
+      "company": "Netflix, Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "netflix_2025_10k.txt",
+      "evidence_snippet": "We aim generally to pay our employees at their personal top of market, and they generally are able t...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.1
+        }
+      },
+      "normalized_position": 0.0495,
+      "position_bucket": "beginning",
+      "question": "How frequently does Netflix conduct pay equity analyses for its workforce?",
+      "question_id": "Q13"
+    },
+    {
+      "answer": "Adopted on 10/23/2025 with 314,880 shares eligible for sale through 12/31/2026.",
+      "company": "Netflix, Inc.",
+      "content_type": "Table/Numeric",
+      "document_id": "netflix_2025_10k.txt",
+      "evidence_snippet": "| Spencer Neumann (2) | | Chief Financial Officer | | Adoption | | 10/23/2025 | | 12/31/2026 | | 314...",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.5,
+      "position_bucket": "middle",
+      "question": "Under Netflix's Rule 10b5-1 trading disclosure, when did CFO Spencer Neumann adopt his plan and how many aggregate shares were scheduled for potential sale?",
+      "question_id": "Q14"
+    },
+    {
+      "answer": "Its co-chief executive officers, who review financial information presented on a consolidated basis.",
+      "company": "Netflix, Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "netflix_2025_10k.txt",
+      "evidence_snippet": "operating segment. The Company's chief operating decision maker (\u201cCODM\u201d) is its co-chief executive o...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.9325,
+      "position_bucket": "end",
+      "question": "Who serves as Netflix's chief operating decision maker (CODM) and how do they review financial information?",
+      "question_id": "Q15"
+    },
+    {
+      "answer": "Productivity and Business Processes, Intelligent Cloud, and More Personal Computing.",
+      "company": "Microsoft Corporation",
+      "content_type": "Narrative/Prose",
+      "document_id": "microsoft_2026_10k.txt",
+      "evidence_snippet": "We operate our business and report our financial performance using three segments: Productivity and ...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.3333333333333333
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.3333333333333333
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.5
+        }
+      },
+      "normalized_position": 0.0401,
+      "position_bucket": "beginning",
+      "question": "What are the three operating segments used by Microsoft to report its business performance?",
+      "question_id": "Q16"
+    },
+    {
+      "answer": "$17.95 in 2026, compared to $13.64 in 2025 and $11.80 in 2024.",
+      "company": "Microsoft Corporation",
+      "content_type": "Table/Numeric",
+      "document_id": "microsoft_2026_10k.txt",
+      "evidence_snippet": "| Diluted | | $ | 17.95 | | | $ | 13.64 | | | $ | 11.80 | |",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.5,
+      "position_bucket": "middle",
+      "question": "According to Microsoft's income statement, what was diluted earnings per share for fiscal year 2026 compared to 2025 and 2024?",
+      "question_id": "Q17"
+    },
+    {
+      "answer": "In its Proxy Statement under the caption 'Delinquent Section 16(a) Reports'.",
+      "company": "Microsoft Corporation",
+      "content_type": "Narrative/Prose",
+      "document_id": "microsoft_2026_10k.txt",
+      "evidence_snippet": "We will provide disclosure of delinquent Section 16(a) reports, if any, in our Proxy Statement under...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.94,
+      "position_bucket": "end",
+      "question": "Where does Microsoft state it will provide disclosure of delinquent Section 16(a) reports?",
+      "question_id": "Q18"
+    },
+    {
+      "answer": "Over the past 5 years, bringing AI to the world's largest industries including NVIDIA DRIVE for autonomous driving and Clara for healthcare.",
+      "company": "NVIDIA Corporation",
+      "content_type": "Narrative/Prose",
+      "document_id": "nvidia_2026_10k.txt",
+      "evidence_snippet": "Innovation is at our core. We have invested over $76.7\u00a0billion in research and development since our...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.0371,
+      "position_bucket": "beginning",
+      "question": "Over what timeframe has NVIDIA built full software stacks on top of GPUs and CUDA, and what domains are cited?",
+      "question_id": "Q19"
+    },
+    {
+      "answer": "Total revenue was $215.9 billion, up 65% from a year ago.",
+      "company": "NVIDIA Corporation",
+      "content_type": "Narrative/Prose",
+      "document_id": "nvidia_2026_10k.txt",
+      "evidence_snippet": "Revenue for fiscal year 2026 was $215.9 billion, up 65% from a year ago.",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.5001,
+      "position_bucket": "middle",
+      "question": "What was NVIDIA's total revenue for fiscal year 2026 and its growth rate from the prior year?",
+      "question_id": "Q20"
+    },
+    {
+      "answer": "$215,938 million in FY2026, compared to $130,497 million in FY2025 and $60,922 million in FY2024.",
+      "company": "NVIDIA Corporation",
+      "content_type": "Table/Numeric",
+      "document_id": "nvidia_2026_10k.txt",
+      "evidence_snippet": "| Total revenue | $ | 215,938 | | | $ | 130,497 | | | $ | 60,922 | |",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.16666666666666666
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.1
+        }
+      },
+      "normalized_position": 0.9404,
+      "position_bucket": "end",
+      "question": "In NVIDIA's revenue footnote table, what was the total consolidated revenue reported for fiscal year 2026 compared to 2025 and 2024 (in millions)?",
+      "question_id": "Q21"
+    },
+    {
+      "answer": "Americas, Europe, Greater China, Japan and Rest of Asia Pacific.",
+      "company": "Apple Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "apple_2025_10k.txt",
+      "evidence_snippet": "The Company manages its business primarily on a geographic basis. The Company\u2019s reportable segments ...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.0545,
+      "position_bucket": "beginning",
+      "question": "What are Apple's reportable geographic operating segments?",
+      "question_id": "Q22"
+    },
+    {
+      "answer": "In its fourth quarter of 2026 using a prospective transition method.",
+      "company": "Apple Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "apple_2025_10k.txt",
+      "evidence_snippet": "(\u201cASU 2023-09\u201d), which will require the Company to disclose specified additional information in its ...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.4985,
+      "position_bucket": "middle",
+      "question": "When will Apple adopt ASU 2023-09 and using what transition method?",
+      "question_id": "Q23"
+    },
+    {
+      "answer": "Officer's Certificate of the Registrant dated May 13, 2015, including forms of global notes.",
+      "company": "Apple Inc.",
+      "content_type": "Table/Numeric",
+      "document_id": "apple_2025_10k.txt",
+      "evidence_snippet": "| 4.7 | | Officer\u2019s Certificate of the Registrant, dated as of May 13, 2015, including forms of glob...",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.5
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.9336,
+      "position_bucket": "end",
+      "question": "Under Exhibit 4.7, what officer certificate and forms of notes are incorporated by reference for Apple?",
+      "question_id": "Q24"
+    },
+    {
+      "answer": "Unifies creative production and marketing execution with comprehensive content management and digital marketing capabilities.",
+      "company": "Adobe Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "adobe_2025_10k.txt",
+      "evidence_snippet": "For marketing professionals, we unify creative production and marketing execution with comprehensive...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.0384,
+      "position_bucket": "beginning",
+      "question": "How does Adobe describe its solution for marketing professionals in Adobe Experience Cloud?",
+      "question_id": "Q25"
+    },
+    {
+      "answer": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK",
+      "company": "Adobe Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "adobe_2025_10k.txt",
+      "evidence_snippet": "ITEM 7A.\u00a0\u00a0QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.5003,
+      "position_bucket": "middle",
+      "question": "What is the heading and title of Item 7A in Adobe's report?",
+      "question_id": "Q26"
+    },
+    {
+      "answer": "A matter arising from the current period audit of the consolidated financial statements communicated or required to be communicated to the audit committee.",
+      "company": "Adobe Inc.",
+      "content_type": "Narrative/Prose",
+      "document_id": "adobe_2025_10k.txt",
+      "evidence_snippet": "The critical audit matter communicated below is a matter arising from the current period audit of th...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.16666666666666666
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.125
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.125
+        }
+      },
+      "normalized_position": 0.9386,
+      "position_bucket": "end",
+      "question": "In the auditor report for Adobe, what definition is given for the critical audit matter communicated?",
+      "question_id": "Q27"
+    },
+    {
+      "answer": "Designed to help organizations find, develop and retain talent, enable collaboration, provide workforce insights, and improve business processes.",
+      "company": "Oracle Corporation",
+      "content_type": "Narrative/Prose",
+      "document_id": "oracle_2026_10k.txt",
+      "evidence_snippet": "Oracle Fusion Cloud Human Capital Management (HCM), which is designed to help organizations find, de...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.04,
+      "position_bucket": "beginning",
+      "question": "What is the primary design purpose of Oracle Fusion Cloud Human Capital Management (HCM)?",
+      "question_id": "Q28"
+    },
+    {
+      "answer": "To increase existing data center capacity and establish data centers in new geographic locations to meet customer demand for cloud offerings.",
+      "company": "Oracle Corporation",
+      "content_type": "Narrative/Prose",
+      "document_id": "oracle_2026_10k.txt",
+      "evidence_snippet": "Cash used for capital expenditures increased from $21.2 billion in fiscal 2025 to $55.7 billion in f...",
+      "justification": "Evidence consists of standard grammatical prose describing business, legal, or accounting policies.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 0.2
+        },
+        "rrf": {
+          "hit@1": 1.0,
+          "hit@10": 1.0,
+          "hit@5": 1.0,
+          "mrr@10": 1.0
+        }
+      },
+      "normalized_position": 0.5009,
+      "position_bucket": "middle",
+      "question": "Why does Oracle expect capital expenditures for data centers to trend upward during fiscal 2027 and following years?",
+      "question_id": "Q29"
+    },
+    {
+      "answer": "$2,013 million in fiscal 2026 compared to $1,794 million in fiscal 2025.",
+      "company": "Oracle Corporation",
+      "content_type": "Table/Numeric",
+      "document_id": "oracle_2026_10k.txt",
+      "evidence_snippet": "| Germany | | | 1,993 | | | | 2,432 | | | | 1,817 | | | | 2,013 | | | | 1,794 | | | | 1,192 | |",
+      "justification": "Evidence contains markdown table row format (| ... |) representing structured tabular metrics.",
+      "metrics": {
+        "bm25": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "dense": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        },
+        "rrf": {
+          "hit@1": 0.0,
+          "hit@10": 0.0,
+          "hit@5": 0.0,
+          "mrr@10": 0.0
+        }
+      },
+      "normalized_position": 0.9402,
+      "position_bucket": "end",
+      "question": "In Oracle's geographic segment disclosures, what were the total revenues attributable to Germany for fiscal 2026 compared to fiscal 2025 (in millions)?",
+      "question_id": "Q30"
+    }
+  ],
+  "position_bucket_marginals": [
+    {
+      "bm25_hit@5": 0.5,
+      "bm25_mrr@10": 0.4333,
+      "count": 10,
+      "dense_hit@5": 0.4,
+      "dense_mrr@10": 0.2676,
+      "position_bucket": "beginning",
+      "rrf_hit@5": 0.4,
+      "rrf_mrr@10": 0.36
+    },
+    {
+      "bm25_hit@5": 0.3,
+      "bm25_mrr@10": 0.2458,
+      "count": 10,
+      "dense_hit@5": 0.4,
+      "dense_mrr@10": 0.165,
+      "position_bucket": "middle",
+      "rrf_hit@5": 0.4,
+      "rrf_mrr@10": 0.2644
+    },
+    {
+      "bm25_hit@5": 0.4,
+      "bm25_mrr@10": 0.4333,
+      "count": 10,
+      "dense_hit@5": 0.5,
+      "dense_mrr@10": 0.4625,
+      "position_bucket": "end",
+      "rrf_hit@5": 0.5,
+      "rrf_mrr@10": 0.5225
+    }
+  ]
+}
