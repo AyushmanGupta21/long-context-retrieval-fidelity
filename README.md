@@ -347,12 +347,14 @@ Because the transformation $f(x) = \sqrt{2(1 - x)}$ is strictly monotonically de
 ### Metric Definitions and the Effect of K
 - **Hit Rate@K**: $\frac{1}{N} \sum_{i=1}^N \mathbb{1}[|R_{i, K}| > 0]$, where $R_{i, K}$ is the set of relevant chunks in top-$K$.
 - **Precision@K**: $\frac{1}{N} \sum_{i=1}^N \frac{|R_{i, K}|}{K}$.
-- **Recall@K**: $\frac{1}{N} \sum_{i=1}^N \frac{|R_{i, K}|}{T_i}$, where $T_i$ is the total relevant chunks for query $i$ across the corpus.
+- **Recall@K (Macro-Averaged)**:
+  $$\operatorname{Recall@K} = \frac{1}{N}\sum_{i=1}^{N} \frac{|R_{i,K}|}{T_i}$$
+  Here, $R_{i,K}$ denotes relevant chunks retrieved for query $i$ within the top $K$, and $T_i$ denotes the total relevant chunks for that query in the corpus. For $T_i = 0$, the query's recall is defined as zero, as implemented in `compute_query_metrics()` and macro-averaged via `np.mean()` in `_aggregate()` (`src/evaluator.py`). The metric is an unweighted macro-average over queries, not a pooled micro-ratio of the form $\sum_i |R_{i, K}| / \sum_i T_i$.
 - **MRR@K**: $\frac{1}{N} \sum_{i=1}^N \frac{1}{\text{rank}_i}$ if $\text{rank}_i \le K$, else $0.0$.
 - **Why Precision Falls and Recall Rises**: In SEC filings, benchmark queries target specific disclosures that appear in only 1 to 2 chunks ($T_i \in [1, 2]$). As $K$ expands from 1 to 10, the numerator $|R_{i, K}|$ is bounded at $\le 2$, while the denominator $K$ increases tenfold, inevitably diluting Precision@K while providing more opportunities to capture target evidence (increasing Recall@K).
 - **Recall@5 Interpretation and Distinction from Hit@5**:
   - *Dense vs. RRF at K=5*: RRF achieves Recall@5 of 0.4333, matching Dense alone (0.4333, $\Delta = 0.0000$), while exceeding BM25 alone (0.4000, $\Delta = +0.0333$).
-  - *Distinction from Hit@5*: Hit@5 indicates whether at least one target chunk was captured in the top 5 (Dense and RRF both achieve 0.4333, or 13/30 queries; BM25 achieves 0.4000, or 12/30 queries). Recall@5 evaluates the proportion of total ground-truth chunks retrieved across queries ($\frac{1}{N} \sum |R_{i, 5}| / T_i$). Because benchmark queries have either 1 or 2 target evidence chunks ($T_i \in \{1, 2\}$), recall measures multi-chunk coverage.
+  - *Distinction from Hit@5*: Hit@5 indicates whether at least one target chunk was captured in the top 5 (Dense and RRF both achieve 0.4333, or 13/30 queries; BM25 achieves 0.4000, or 12/30 queries). Recall@5 evaluates the macro-averaged proportion of ground-truth chunks retrieved across queries ($\frac{1}{N} \sum_{i=1}^N \frac{|R_{i, 5}|}{T_i}$). Because benchmark queries have either 1 or 2 target evidence chunks ($T_i \in \{1, 2\}$), recall measures multi-chunk coverage.
   - *Rankings vs. Aggregates*: While RRF and Dense yield identical aggregate Recall@5 (0.4333) and Hit@5 (0.4333), they do not produce identical candidate rankings or per-query outputs. RRF elevates the positions of relevant chunks within the top 5 (lifting MRR@5 from 0.2894 to 0.3678), but captures no net additional target chunks over Dense at this cutoff depth.
 
 ---
