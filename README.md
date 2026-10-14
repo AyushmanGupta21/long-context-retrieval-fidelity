@@ -284,28 +284,48 @@ A dense bi-encoder retrieval pipeline operates fundamentally differently from a 
 
 ### Mathematical Formulation
 The embedding engine (`src/embeddings.py`) uses `sentence-transformers/all-MiniLM-L6-v2` to map text passages into $\mathbb{R}^{384}$. Embeddings are unit L2-normalized upon extraction:
-$$\hat{\mathbf{v}} = \frac{\mathbf{v}}{\|\mathbf{v}\|_2} = \frac{\mathbf{v}}{\sqrt{\sum_{i=1}^{384} v_i^2}}$$
+
+$$
+\hat{\mathbf{v}} = \frac{\mathbf{v}}{\|\mathbf{v}\|_2} = \frac{\mathbf{v}}{\sqrt{\sum_{i=1}^{384} v_i^2}}
+$$
 
 <details>
 <summary><strong>Click to expand: First-Principles Derivation of Cosine Similarity and L2 Equivalence</strong></summary>
 
 #### Geometric Derivation
 For query vector $\mathbf{q}$ and document chunk vector $\mathbf{d}$, the dot product relates to the angle $\theta$ between them:
-$$\mathbf{q} \cdot \mathbf{d} = \|\mathbf{q}\|_2 \|\mathbf{d}\|_2 \cos(\theta)$$
+
+$$
+\mathbf{q} \cdot \mathbf{d} = \|\mathbf{q}\|_2 \|\mathbf{d}\|_2 \cos(\theta)
+$$
 
 Cosine similarity isolates the angle by normalizing vector magnitudes:
-$$\cos(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\|_2 \|\mathbf{d}\|_2} = \sum_{i=1}^d \frac{q_i}{\|\mathbf{q}\|_2} \frac{d_i}{\|\mathbf{d}\|_2}$$
+
+$$
+\cos(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\|_2 \|\mathbf{d}\|_2} = \sum_{i=1}^d \frac{q_i}{\|\mathbf{q}\|_2} \frac{d_i}{\|\mathbf{d}\|_2}
+$$
 
 In vectorized form over a pre-normalized corpus matrix $\hat{\mathbf{D}} \in \mathbb{R}^{N \times 384}$ and normalized query $\hat{\mathbf{q}} \in \mathbb{R}^{384}$:
-$$\mathbf{s} = \hat{\mathbf{D}} \hat{\mathbf{q}}$$
+
+$$
+\mathbf{s} = \hat{\mathbf{D}} \hat{\mathbf{q}}
+$$
+
 implemented directly in `compute_cosine_similarity()` (`src/retriever.py`).
 
 #### Equivalence to Euclidean Distance for Unit Vectors
 The squared Euclidean distance between two unit vectors is:
-$$\|\hat{\mathbf{q}} - \hat{\mathbf{d}}\|_2^2 = \|\hat{\mathbf{q}}\|_2^2 + \|\hat{\mathbf{d}}\|_2^2 - 2(\hat{\mathbf{q}} \cdot \hat{\mathbf{d}}) = 1 + 1 - 2\cos(\mathbf{q}, \mathbf{d}) = 2 - 2\cos(\mathbf{q}, \mathbf{d})$$
+
+$$
+\|\hat{\mathbf{q}} - \hat{\mathbf{d}}\|_2^2 = \|\hat{\mathbf{q}}\|_2^2 + \|\hat{\mathbf{d}}\|_2^2 - 2(\hat{\mathbf{q}} \cdot \hat{\mathbf{d}}) = 1 + 1 - 2\cos(\mathbf{q}, \mathbf{d}) = 2 - 2\cos(\mathbf{q}, \mathbf{d})
+$$
 
 Taking the square root:
-$$\|\hat{\mathbf{q}} - \hat{\mathbf{d}}\|_2 = \sqrt{2(1 - \cos(\mathbf{q}, \mathbf{d}))}$$
+
+$$
+\|\hat{\mathbf{q}} - \hat{\mathbf{d}}\|_2 = \sqrt{2(1 - \cos(\mathbf{q}, \mathbf{d}))}
+$$
+
 Because the transformation $f(x) = \sqrt{2(1 - x)}$ is strictly monotonically decreasing for $x \in [-1, 1]$, maximizing cosine similarity produces the exact same rank ordering as minimizing Euclidean distance for L2-normalized embeddings.
 </details>
 
@@ -348,7 +368,11 @@ Because the transformation $f(x) = \sqrt{2(1 - x)}$ is strictly monotonically de
 - **Hit Rate@K**: $\frac{1}{N} \sum_{i=1}^N \mathbb{1}[|R_{i, K}| > 0]$, where $R_{i, K}$ is the set of relevant chunks in top-$K$.
 - **Precision@K**: $\frac{1}{N} \sum_{i=1}^N \frac{|R_{i, K}|}{K}$.
 - **Recall@K (Macro-Averaged)**:
-  $$\text{Recall@K} = \frac{1}{N}\sum_{i=1}^{N} \frac{|R_{i,K}|}{T_i}$$
+
+  $$
+  \text{Recall@K} = \frac{1}{N}\sum_{i=1}^{N} \frac{|R_{i,K}|}{T_i}
+  $$
+
   Here, $R_{i,K}$ denotes relevant chunks retrieved for query $i$ within the top $K$, and $T_i$ denotes the total relevant chunks for that query in the corpus. For $T_i = 0$, the query's recall is defined as zero, as implemented in `compute_query_metrics()` and macro-averaged via `np.mean()` in `_aggregate()` (`src/evaluator.py`). The metric is an unweighted macro-average over queries, not a pooled micro-ratio of the form $\sum_i |R_{i, K}| / \sum_i T_i$.
 - **MRR@K**: $\frac{1}{N} \sum_{i=1}^N \frac{1}{\mathrm{rank}_i}$ if $\mathrm{rank}_i \le K$, else $0.0$.
 - **Why Precision Falls and Recall Rises**: In SEC filings, benchmark queries target specific disclosures that appear in only 1 to 2 chunks ($T_i \in [1, 2]$). As $K$ expands from 1 to 10, the numerator $|R_{i, K}|$ is bounded at $\le 2$, while the denominator $K$ increases tenfold, inevitably diluting Precision@K while providing more opportunities to capture target evidence (increasing Recall@K).
@@ -372,7 +396,11 @@ Two distinct document-depth metrics are implemented in the project codebase:
 
 1. **Benchmark Position Metric (Word-Based Start Offset)**:
    - Evaluated in `scripts/build_benchmark.py` and stored in `data/benchmark_queries.json`:
-     $$\text{Normalized Position} = \frac{\text{Word Start Index}}{\text{Total Document Words}}$$
+
+     $$
+     \text{Normalized Position} = \frac{\text{Word Start Index}}{\text{Total Document Words}}
+     $$
+
      *(implemented as `norm_pos = source_word_start / total_document_words`)*
    - **Benchmark Stratification Buckets**:
      - **Beginning**: `norm_pos <= 0.10` (<10% filing depth; 10 queries)
@@ -382,7 +410,11 @@ Two distinct document-depth metrics are implemented in the project codebase:
 
 2. **CLI Document Depth Metric (Character-Midpoint Ratio)**:
    - Evaluated in `src/chunking.py` (lines 182, 280) and displayed during runtime in `src/cli.py`:
-     $$\text{Document Depth Ratio} = \frac{\text{Char Start} + \text{Char End}}{2 \times \text{Total Document Chars}}$$
+
+     $$
+     \text{Document Depth Ratio} = \frac{\text{Char Start} + \text{Char End}}{2 \times \text{Total Document Chars}}
+     $$
+
      *(implemented as `source_position_pct = (char_start + char_end) / (2 * total_document_chars)`)*
    - **CLI Depth Classification Thresholds** (`classify_position_bucket` in `src/chunking.py`):
      - **Beginning**: `[0.00, 0.10]` (0.0%–10.0%)
@@ -507,7 +539,10 @@ Under bootstrap resampling ($B=10,000$), the 95% confidence intervals overlap su
 
 ### Formulation and Parameterization
 Reciprocal Rank Fusion (Cormack et al., SIGIR 2009) merges independent rankings without score normalization:
-$$\mathrm{RRF}(d) = \sum_{r \in \{\text{Dense}, \text{BM25}\}} \frac{1}{c + \mathrm{rank}_r(d)}$$
+
+$$
+\mathrm{RRF}(d) = \sum_{r \in \{\text{Dense}, \text{BM25}\}} \frac{1}{c + \mathrm{rank}_r(d)}
+$$
 
 - **Parameters**: Smoothing constant $c = 60.0$, candidate pool depth $M = 50$.
 - **Contribution Bounds**: For candidate pool depth $M = 50$, each retriever's positive contribution to a document's RRF score ranges from a maximum of $\frac{1}{c + 1} = \frac{1}{61} \approx 0.01639$ (at rank 1) down to a minimum positive contribution of $\frac{1}{c + 50} = \frac{1}{110} \approx 0.00909$ (at rank 50), inclusive. Items unranked or absent from a retriever's top-50 pool receive a contribution of exactly $0.0$ from that retriever.
