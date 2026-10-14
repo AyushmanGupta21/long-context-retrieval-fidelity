@@ -41,7 +41,7 @@ The benchmark evaluates 30 ground-truth evidence queries across 3,957 sentence-a
 ### Empirical Insights and Negative Results
 - **RRF matches Dense on aggregate recall at $K=5$**: At cutoff $K=5$, RRF achieves the same aggregate Hit Rate (0.4333), Precision@5 (0.0933), and Recall@5 (0.4333) as Dense retrieval alone ($\Delta = 0.0000$ vs. Dense; both capture evidence for 13 of 30 queries), while its Recall@5 is 0.0333 higher than BM25 alone (0.4333 vs. 0.4000; Hit@5 0.4333 vs. 0.4000). RRF elevates the relative rank of relevant chunks within the top 5 (lifting MRR@5 from 0.2894 to 0.3678), but provides no net recall gain over Dense at this depth. Equal aggregate metrics reflect different candidate rankings rather than identical per-query performance.
 - **BM25 alone is competitive with RRF**: At $K=1$ and $K=3$, BM25 achieves equal hit counts to RRF on different queries ($b=1, c=1$ in the McNemar test; Hit@1 = 0.3333, Hit@3 = 0.4000, Precision@1 = 0.3333, Recall@1 = 0.3167), while MRR@3 differs (0.3556 for BM25 vs. 0.3611 for RRF). The overall MRR@10 advantage of RRF over BM25 is small (+0.0115, 95% bootstrap CI $[-0.0820, +0.1046]$) and easily crosses zero.
-- **Content type substantially affects retrieval difficulty, while position effects cannot be separated at this sample size**: Tables are substantially harder to retrieve than prose across all modes (Dense MRR 0.1893 for tables vs. 0.3529 for prose). However, the Middle (40-60%) and End ($\ge$90%) buckets each contain exactly 4 table queries out of 10. Table density alone cannot explain the Middle-vs-End gap.
+- **Content type substantially affects retrieval difficulty, while position effects cannot be separated at this sample size**: Tables are substantially harder to retrieve than prose across all modes (Dense MRR 0.1893 for tables vs. 0.3529 for prose). However, the Middle (40-60%) and End (>= 90%) buckets each contain exactly 4 table queries out of 10. Table density alone cannot explain the Middle-vs-End gap.
 - **No evidence of degradation within narrative prose**: Within narrative evidence, Middle Dense MRR@10 (**0.2333**, $n=6$) is not below Beginning Dense MRR@10 (**0.1917**, $n=8$) at this sample size.
 - **The End bucket's strength is partly a query-selection effect**: End narrative queries achieve an unusually high Dense MRR@10 of **0.6875** ($n=6$) because 4 of the 6 queries (Q03 Alphabet insider trading, Q06 Amazon PCAOB oversight, Q09 Meta tax years, Q18 Microsoft Section 16(a) reports) achieved perfect 1.0000 MRR (rank 1) under Dense retrieval alone. These questions query distinctive statutory disclosures that have minimal lexical or semantic competition in the corpus.
 - **Sub-cell sample sizes ($n=2\text{--}8$) are too small to isolate position**: After controlling for content type, the sample size is insufficient to attribute performance differences to document position as an isolated causal factor.
@@ -294,7 +294,7 @@ For query vector $\mathbf{q}$ and document chunk vector $\mathbf{d}$, the dot pr
 $$\mathbf{q} \cdot \mathbf{d} = \|\mathbf{q}\|_2 \|\mathbf{d}\|_2 \cos(\theta)$$
 
 Cosine similarity isolates the angle by normalizing vector magnitudes:
-$$\operatorname{cos}(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\|_2 \|\mathbf{d}\|_2} = \sum_{i=1}^d \frac{q_i}{\|\mathbf{q}\|_2} \frac{d_i}{\|\mathbf{d}\|_2}$$
+$$\cos(\mathbf{q}, \mathbf{d}) = \frac{\mathbf{q} \cdot \mathbf{d}}{\|\mathbf{q}\|_2 \|\mathbf{d}\|_2} = \sum_{i=1}^d \frac{q_i}{\|\mathbf{q}\|_2} \frac{d_i}{\|\mathbf{d}\|_2}$$
 
 In vectorized form over a pre-normalized corpus matrix $\hat{\mathbf{D}} \in \mathbb{R}^{N \times 384}$ and normalized query $\hat{\mathbf{q}} \in \mathbb{R}^{384}$:
 $$\mathbf{s} = \hat{\mathbf{D}} \hat{\mathbf{q}}$$
@@ -302,10 +302,10 @@ implemented directly in `compute_cosine_similarity()` (`src/retriever.py`).
 
 #### Equivalence to Euclidean Distance for Unit Vectors
 The squared Euclidean distance between two unit vectors is:
-$$\|\hat{\mathbf{q}} - \hat{\mathbf{d}}\|_2^2 = \|\hat{\mathbf{q}}\|_2^2 + \|\hat{\mathbf{d}}\|_2^2 - 2(\hat{\mathbf{q}} \cdot \hat{\mathbf{d}}) = 1 + 1 - 2\operatorname{cos}(\mathbf{q}, \mathbf{d}) = 2 - 2\operatorname{cos}(\mathbf{q}, \mathbf{d})$$
+$$\|\hat{\mathbf{q}} - \hat{\mathbf{d}}\|_2^2 = \|\hat{\mathbf{q}}\|_2^2 + \|\hat{\mathbf{d}}\|_2^2 - 2(\hat{\mathbf{q}} \cdot \hat{\mathbf{d}}) = 1 + 1 - 2\cos(\mathbf{q}, \mathbf{d}) = 2 - 2\cos(\mathbf{q}, \mathbf{d})$$
 
 Taking the square root:
-$$\|\hat{\mathbf{q}} - \hat{\mathbf{d}}\|_2 = \sqrt{2(1 - \operatorname{cos}(\mathbf{q}, \mathbf{d}))}$$
+$$\|\hat{\mathbf{q}} - \hat{\mathbf{d}}\|_2 = \sqrt{2(1 - \cos(\mathbf{q}, \mathbf{d}))}$$
 Because the transformation $f(x) = \sqrt{2(1 - x)}$ is strictly monotonically decreasing for $x \in [-1, 1]$, maximizing cosine similarity produces the exact same rank ordering as minimizing Euclidean distance for L2-normalized embeddings.
 </details>
 
@@ -348,9 +348,9 @@ Because the transformation $f(x) = \sqrt{2(1 - x)}$ is strictly monotonically de
 - **Hit Rate@K**: $\frac{1}{N} \sum_{i=1}^N \mathbb{1}[|R_{i, K}| > 0]$, where $R_{i, K}$ is the set of relevant chunks in top-$K$.
 - **Precision@K**: $\frac{1}{N} \sum_{i=1}^N \frac{|R_{i, K}|}{K}$.
 - **Recall@K (Macro-Averaged)**:
-  $$\operatorname{Recall@K} = \frac{1}{N}\sum_{i=1}^{N} \frac{|R_{i,K}|}{T_i}$$
+  $$\text{Recall@K} = \frac{1}{N}\sum_{i=1}^{N} \frac{|R_{i,K}|}{T_i}$$
   Here, $R_{i,K}$ denotes relevant chunks retrieved for query $i$ within the top $K$, and $T_i$ denotes the total relevant chunks for that query in the corpus. For $T_i = 0$, the query's recall is defined as zero, as implemented in `compute_query_metrics()` and macro-averaged via `np.mean()` in `_aggregate()` (`src/evaluator.py`). The metric is an unweighted macro-average over queries, not a pooled micro-ratio of the form $\sum_i |R_{i, K}| / \sum_i T_i$.
-- **MRR@K**: $\frac{1}{N} \sum_{i=1}^N \frac{1}{\text{rank}_i}$ if $\text{rank}_i \le K$, else $0.0$.
+- **MRR@K**: $\frac{1}{N} \sum_{i=1}^N \frac{1}{\mathrm{rank}_i}$ if $\mathrm{rank}_i \le K$, else $0.0$.
 - **Why Precision Falls and Recall Rises**: In SEC filings, benchmark queries target specific disclosures that appear in only 1 to 2 chunks ($T_i \in [1, 2]$). As $K$ expands from 1 to 10, the numerator $|R_{i, K}|$ is bounded at $\le 2$, while the denominator $K$ increases tenfold, inevitably diluting Precision@K while providing more opportunities to capture target evidence (increasing Recall@K).
 - **Recall@5 Interpretation and Distinction from Hit@5**:
   - *Dense vs. RRF at K=5*: RRF achieves Recall@5 of 0.4333, matching Dense alone (0.4333, $\Delta = 0.0000$), while exceeding BM25 alone (0.4000, $\Delta = +0.0333$).
@@ -365,28 +365,30 @@ Because the transformation $f(x) = \sqrt{2(1 - x)}$ is strictly monotonically de
 The benchmark (`data/benchmark_queries.json`) contains 30 evidence-grounded queries distributed evenly across all 10 companies (3 queries per company) and stratified by evidence location:
 - **Beginning (<10% depth)**: 10 queries (Q01, Q04, Q07, Q10, Q13, Q16, Q19, Q22, Q25, Q28).
 - **Middle (40-60% depth)**: 10 queries (Q02, Q05, Q08, Q11, Q14, Q17, Q20, Q23, Q26, Q29).
-- **End ($\ge$90% depth)**: 10 queries (Q03, Q06, Q09, Q12, Q15, Q18, Q21, Q24, Q27, Q30).
+- **End (>= 90% depth)**: 10 queries (Q03, Q06, Q09, Q12, Q15, Q18, Q21, Q24, Q27, Q30).
 
 ### Position Definitions and Classification Thresholds
 Two distinct document-depth metrics are implemented in the project codebase:
 
 1. **Benchmark Position Metric (Word-Based Start Offset)**:
    - Evaluated in `scripts/build_benchmark.py` and stored in `data/benchmark_queries.json`:
-     $$\text{norm\_pos} = \frac{\text{source\_word\_start}}{\text{total\_document\_words}}$$
+     $$\text{Normalized Position} = \frac{\text{Word Start Index}}{\text{Total Document Words}}$$
+     *(implemented as `norm_pos = source_word_start / total_document_words`)*
    - **Benchmark Stratification Buckets**:
-     - **Beginning**: $\text{norm\_pos} \le 0.10$ ($<10\%$ filing depth; 10 queries)
-     - **Middle**: $0.40 \le \text{norm\_pos} \le 0.60$ ($40\%\text{--}60\%$ filing depth; 10 queries)
-     - **End**: $\text{norm\_pos} \ge 0.90$ ($\ge 90\%$ filing depth; 10 queries)
-   - *Note*: Intermediate regions ($10\%\text{--}40\%$ and $60\%\text{--}90\%$) are intentionally omitted from the 30-query benchmark to isolate polar and central bands.
+     - **Beginning**: `norm_pos <= 0.10` (<10% filing depth; 10 queries)
+     - **Middle**: `0.40 <= norm_pos <= 0.60` (40%–60% filing depth; 10 queries)
+     - **End**: `norm_pos >= 0.90` (>= 90% filing depth; 10 queries)
+   - *Note*: Intermediate regions (10%–40% and 60%–90%) are intentionally omitted from the 30-query benchmark to isolate polar and central bands.
 
 2. **CLI Document Depth Metric (Character-Midpoint Ratio)**:
    - Evaluated in `src/chunking.py` (lines 182, 280) and displayed during runtime in `src/cli.py`:
-     $$\text{source\_position\_pct} = \frac{\text{char\_start} + \text{char\_end}}{2 \times \text{total\_document\_chars}}$$
+     $$\text{Document Depth Ratio} = \frac{\text{Char Start} + \text{Char End}}{2 \times \text{Total Document Chars}}$$
+     *(implemented as `source_position_pct = (char_start + char_end) / (2 * total_document_chars)`)*
    - **CLI Depth Classification Thresholds** (`classify_position_bucket` in `src/chunking.py`):
-     - **Beginning**: $[0.00, 0.10]$ ($0.0\%\text{--}10.0\%$)
-     - **Intermediate**: $(0.10, 0.40)$ and $(0.60, 0.90)$ ($10.0\%\text{--}40.0\%$ and $60.0\%\text{--}90.0\%$)
-     - **Middle**: $[0.40, 0.60]$ ($40.0\%\text{--}60.0\%$)
-     - **End**: $[0.90, 1.00]$ ($90.0\%\text{--}100.0\%$)
+     - **Beginning**: `[0.00, 0.10]` (0.0%–10.0%)
+     - **Intermediate**: `(0.10, 0.40)` and `(0.60, 0.90)` (10.0%–40.0% and 60.0%–90.0%)
+     - **Middle**: `[0.40, 0.60]` (40.0%–60.0%)
+     - **End**: `[0.90, 1.00]` (90.0%–100.0%)
    - *Distinction*: When the CLI retrieves a passage at e.g. 37.9% filing depth (such as Amazon's segment net sales passage), it labels the depth as `INTERMEDIATE (37.9%)`, whereas the benchmark classifies queries strictly into Beginning, Middle, or End.
 
 ### Relevance Rule (`src/evaluator.py`)
@@ -427,7 +429,7 @@ A candidate chunk $c$ is marked relevant for query $q$ if and only if:
 | | Table-Formatted* | 2* | 0.500* | 0.5714* | 0.500* | 0.5000* | 0.500* | 0.5000* |
 | **Middle (40-60%)** | Narrative / Prose | 6 | 0.500 | 0.2333 | 0.500 | 0.3889 | 0.500 | 0.3889 |
 | | Table-Formatted | 4 | 0.250 | 0.0625 | 0.000 | 0.0312 | 0.250 | 0.0778 |
-| **End ($\ge$90%)** | Narrative / Prose | 6 | 0.667 | 0.6875 | 0.500 | 0.5278 | 0.667 | 0.6875 |
+| **End (>= 90%)** | Narrative / Prose | 6 | 0.667 | 0.6875 | 0.500 | 0.5278 | 0.667 | 0.6875 |
 | | Table-Formatted | 4 | 0.250 | 0.1250 | 0.250 | 0.2917 | 0.250 | 0.2750 |
 | **Overall Marginals** | **Narrative / Prose** | **20** | **0.500** | **0.3529** | **0.500** | **0.4417** | **0.500** | **0.4529** |
 | | **Table-Formatted** | **10** | **0.300** | **0.1893** | **0.200** | **0.2292** | **0.300** | **0.2411** |
@@ -481,7 +483,7 @@ A candidate chunk $c$ is marked relevant for query $q$ if and only if:
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Beginning (<10%)** | 10 | 0.4000 | [0.1000, 0.7000] | 0.2676 | [0.0533, 0.5333] |
 | **Middle (40%-60%)** | 10 | 0.4000 | [0.1000, 0.7000] | 0.1650 | [0.0200, 0.3700] |
-| **End ($\ge 90%$)** | 10 | 0.5000 | [0.2000, 0.8000] | 0.4625 | [0.1750, 0.7500] |
+| **End (>= 90%)** | 10 | 0.5000 | [0.2000, 0.8000] | 0.4625 | [0.1750, 0.7500] |
 | **Overall** | **30** | **0.4333** | **[0.2667, 0.6000]** | **0.2984** | **[0.1793, 0.4285]** |
 
 ### Fixed-192 Baseline Performance (Historical Comparison)
@@ -491,7 +493,7 @@ A candidate chunk $c$ is marked relevant for query $q$ if and only if:
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Beginning (<10%)** | 10 | 0.2000 | 0.4000 | 0.4000 | 0.5000 | 0.2944 |
 | **Middle (40%-60%)** | 10 | 0.0000 | 0.3000 | 0.3000 | 0.3000 | 0.1333 |
-| **End ($\ge 90%$)** | 10 | 0.2000 | 0.3000 | 0.3000 | 0.4000 | 0.2611 |
+| **End (>= 90%)** | 10 | 0.2000 | 0.3000 | 0.3000 | 0.4000 | 0.2611 |
 | **Overall Corpus** | **30** | **0.1333** | **0.3333** | **0.3333** | **0.4000** | **0.2296** |
 
 ![Baseline Position Accuracy by Document Depth](results/baseline_position_accuracy.png)
@@ -505,7 +507,7 @@ Under bootstrap resampling ($B=10,000$), the 95% confidence intervals overlap su
 
 ### Formulation and Parameterization
 Reciprocal Rank Fusion (Cormack et al., SIGIR 2009) merges independent rankings without score normalization:
-$$\operatorname{RRF}(d) = \sum_{r \in \{\text{Dense}, \text{BM25}\}} \frac{1}{c + \operatorname{rank}_r(d)}$$
+$$\mathrm{RRF}(d) = \sum_{r \in \{\text{Dense}, \text{BM25}\}} \frac{1}{c + \mathrm{rank}_r(d)}$$
 
 - **Parameters**: Smoothing constant $c = 60.0$, candidate pool depth $M = 50$.
 - **Contribution Bounds**: For candidate pool depth $M = 50$, each retriever's positive contribution to a document's RRF score ranges from a maximum of $\frac{1}{c + 1} = \frac{1}{61} \approx 0.01639$ (at rank 1) down to a minimum positive contribution of $\frac{1}{c + 50} = \frac{1}{110} \approx 0.00909$ (at rank 50), inclusive. Items unranked or absent from a retriever's top-50 pool receive a contribution of exactly $0.0$ from that retriever.
@@ -554,7 +556,7 @@ $$\operatorname{RRF}(d) = \sum_{r \in \{\text{Dense}, \text{BM25}\}} \frac{1}{c 
 | | Hit@10 | +0.0000 | [-0.1667, +0.1667] | McNemar Binomial | $b=3, c=3$ | $p = 1.0000$ | Equal hit counts on different queries ($b=3, c=3$) |
 | | MRR@10 | +0.0725 | [-0.0456, +0.1975] | Sign Test / Bootstrap | 8 pos, 3 neg, 19 ties | $p = 0.2266$ (Sign) | Indistinguishable (CI crosses 0) |
 
-*Multiple-Testing Note*: Across the 15 comparisons evaluated (3 model pairs $\times$ 5 metrics), applying Bonferroni correction yields an adjusted threshold of $\alpha_{\text{adjusted}} = 0.05 / 15 \approx 0.00333$ (or $\alpha = 0.0125$ for 4 Hit metrics). Under this standard threshold, **none** of the pairwise differences reach statistical significance. The asymptotic Wilcoxon signed-rank test on RRF vs. Dense MRR@10 ($W=47.0, p=0.0472$) sits right at the nominal 0.05 boundary, discards 20 tied pairs (66.7%), and does not survive multiple-testing correction.
+*Multiple-Testing Note*: Across the 15 comparisons evaluated (3 model pairs $\times$ 5 metrics), applying Bonferroni correction yields an adjusted threshold of $\alpha_{\mathrm{adjusted}} = 0.05 / 15 \approx 0.00333$ (or $\alpha = 0.0125$ for 4 Hit metrics). Under this standard threshold, **none** of the pairwise differences reach statistical significance. The asymptotic Wilcoxon signed-rank test on RRF vs. Dense MRR@10 ($W=47.0, p=0.0472$) sits right at the nominal 0.05 boundary, discards 20 tied pairs (66.7%), and does not survive multiple-testing correction.
 
 ### Where Mitigation Did Not Work
 - **No net recall gain over Dense at $K=5$**: RRF yields no Recall@5 gain over Dense alone at this cutoff (both at 0.4333, delta 0.0000), while its Recall@5 is 0.0333 higher than BM25 alone (0.4333 vs. 0.4000). Both RRF and Dense achieve Hit@5 of 0.4333 (13/30 queries with evidence retrieved), whereas BM25 achieves Hit@5 of 0.4000 (12/30 queries). Equal aggregate metrics do not imply identical rankings or identical per-query performance: RRF elevates MRR@5 from 0.2894 (Dense) to 0.3678 by promoting candidate ranks within the top 5, but uncovers no net additional relevant chunks over Dense at this cutoff.
