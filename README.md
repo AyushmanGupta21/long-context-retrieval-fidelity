@@ -39,7 +39,7 @@ The benchmark evaluates 30 ground-truth evidence queries across 3,957 sentence-a
 | *RRF vs. BM25 Delta ($\Delta$)* | *0.0000* | *+0.0333* | *+0.0667* | *+0.0115* | *+0.0067* | *+0.0333* |
 
 ### Empirical Insights and Negative Results
-- **RRF equals Dense at $K=5$**: At cutoff $K=5$, RRF achieves identical Hit Rate (0.4333), Precision@5 (0.0933), and Recall@5 (0.4333) to Dense retrieval alone ($\Delta = 0.0000$). Both modes retrieve target evidence for exactly 13 of 30 queries. RRF elevates the relative rank of relevant chunks within the top 5 (lifting MRR@5 from 0.2894 to 0.3678), but uncovers no net new documents at this depth.
+- **RRF matches Dense on aggregate recall at $K=5$**: At cutoff $K=5$, RRF achieves the same aggregate Hit Rate (0.4333), Precision@5 (0.0933), and Recall@5 (0.4333) as Dense retrieval alone ($\Delta = 0.0000$ vs. Dense; both capture evidence for 13 of 30 queries), while its Recall@5 is 0.0333 higher than BM25 alone (0.4333 vs. 0.4000; Hit@5 0.4333 vs. 0.4000). RRF elevates the relative rank of relevant chunks within the top 5 (lifting MRR@5 from 0.2894 to 0.3678), but provides no net recall gain over Dense at this depth. Equal aggregate metrics reflect different candidate rankings rather than identical per-query performance.
 - **BM25 alone is competitive with RRF**: At $K=1$ and $K=3$, BM25 achieves equal hit counts to RRF on different queries ($b=1, c=1$ in the McNemar test; Hit@1 = 0.3333, Hit@3 = 0.4000, Precision@1 = 0.3333, Recall@1 = 0.3167), while MRR@3 differs (0.3556 for BM25 vs. 0.3611 for RRF). The overall MRR@10 advantage of RRF over BM25 is small (+0.0115, 95% bootstrap CI $[-0.0820, +0.1046]$) and easily crosses zero.
 - **Content type substantially affects retrieval difficulty, while position effects cannot be separated at this sample size**: Tables are substantially harder to retrieve than prose across all modes (Dense MRR 0.1893 for tables vs. 0.3529 for prose). However, the Middle (40-60%) and End ($\ge$90%) buckets each contain exactly 4 table queries out of 10. Table density alone cannot explain the Middle-vs-End gap.
 - **No evidence of degradation within narrative prose**: Within narrative evidence, Middle Dense MRR@10 (**0.2333**, $n=6$) is not below Beginning Dense MRR@10 (**0.1917**, $n=8$) at this sample size.
@@ -48,7 +48,7 @@ The benchmark evaluates 30 ground-truth evidence queries across 3,957 sentence-a
 
 ---
 
-## 2. Quick Start (Target: Under 5 Minutes)
+## 2. Setup and Execution Reference
 
 ### Environment Prerequisites
 - Python 3.11 (tested on Python 3.11.9)
@@ -80,9 +80,13 @@ pip install -r requirements.txt
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# 2. Install dependencies (Windows default wheels pull CPU torch automatically)
+# 2. Supported PyTorch pre-installation (recommended on Windows to avoid large GPU wheel downloads)
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# 3. Install remaining project dependencies
 pip install -r requirements.txt
 ```
+*PyTorch Build Note*: The verified clean-clone sequence executed this two-step installation. Because `pip install -r requirements.txt` specifies `sentence-transformers` and `torch`, local pip resolver and cache states determine whether the CPU-only or standard wheel remains active. Operators can verify their installed PyTorch build with `python -c "import torch; print(torch.__version__)"`.
 
 ### Execution & Verification Commands
 
@@ -106,7 +110,17 @@ python scripts/generate_precision_recall_comparison.py
 python scripts/evaluate_scientific_validity.py
 ```
 
-*Measured Execution Timings (2026-10-14)*: `pytest --collect-only -q`: 82 tests collected in 1.15s; `pytest -q`: 82 passed in 32.61s (measured on untampered test suite; 52.52s in neutralized runtime where 80 tests pass and 2 fail solely due to hardcoded employer name assertions in tests).
+### Measured Clean-Clone Setup and Verification Timings (2026-10-14)
+An end-to-end verification run in a clean temporary directory on Windows (Python 3.11) yielded the following measured timings:
+- **Clean Environment Setup (Total: ~10m 37s)**:
+  - Git repository clone (`git clone`): **1.81s**
+  - Virtual environment creation (`python -m venv`): **37.75s**
+  - PyTorch pre-installation step (`pip install torch --index-url https://download.pytorch.org/whl/cpu`): **303.85s (~5m 04s)**
+  - Project dependencies (`pip install -r requirements.txt`): **293.53s (~4m 54s)**
+- **Query and Verification Stages (Total: ~1m 29s)**:
+  - Initial CLI search query with cold model loading: **51.68s** (subsequent warm queries: ~1.4s)
+  - Full test suite execution (`pytest -q`): **37.69s** (**82 passed**, 0 failed)
+- **Full Pipeline (Clone to Passing Tests)**: **~12m 06s**. Rebuilding the full persistent index from raw filings (`python scripts/build_index.py`) adds an optional 4 to 6 minutes on CPU.
 
 ---
 
@@ -217,14 +231,15 @@ In generative language models, the "Lost in the Middle" phenomenon (Liu et al., 
 - **Positional Encoding Degradation**: Relative positional encodings (e.g., RoPE) can exhibit decay or attenuation over large context spans.
 - *Distinction*: "Attention sink" phenomena (Xiao et al., 2023 / StreamingLLM) describe disproportionate softmax mass assigned to initial sequence tokens (`[CLS]` or initial prompt tokens) regardless of semantic relevance because softmax requires non-zero output. This is distinct from Liu et al.'s findings regarding multi-document prompt middle degradation.
 
-### (b) Why a Bi-Encoder Pipeline Lacks This Failure by Construction
-A dense bi-encoder retrieval pipeline operates fundamentally differently from a long-context generative LLM:
-1. **Independent Chunk Encoding**: The embedding model encodes each 192-token chunk independently in isolation into $\mathbb{R}^{384}$. The bi-encoder never sees the full 80,000-word document at once and has no knowledge of where a chunk was situated in the original document.
-2. **Mean-Pooling Invariance**: Chunks undergo mean-pooling over contextualized token embeddings. There is no document-level self-attention mechanism that could causally degrade a middle chunk based on document position.
-3. **Position-Correlated Factors**: Observed performance differences by source position are consistent with document structure rather than an attention failure:
+### (b) How Independent-Chunk Bi-Encoder Retrieval Differs from the Long-Context LLM Setting
+A dense bi-encoder retrieval pipeline operates fundamentally differently from a single long-context generative LLM:
+1. **Independent Chunk Encoding**: The embedding model encodes each ~192-token chunk independently in isolation into $\mathbb{R}^{384}$. The bi-encoder never processes the full 50,000-to-80,000-word document in a single attention window and has no document-level position coordinates during encoding. Consequently, this benchmark does not directly measure or test the original full-prompt self-attention degradation described by Liu et al. (2023).
+2. **Mean-Pooling and Embedding Scope**: Token representations are mean-pooled across each isolated chunk's tokens. There is no cross-chunk or document-spanning attention layer that could causally attenuate a middle passage simply because of its document-level index.
+3. **Position-Correlated Factors**: While a Transformer context-window failure does not apply across independent chunks, observed retrieval performance still varies across source document locations due to structural and content confounds:
    - *Content Formatting*: Tables concentrate heavily in Item 8 (Middle 40-60%), and tables are inherently harder for bi-encoders.
-   - *Section Terminology*: Regulatory disclosures in Part III / Item 15 (End $\ge$90%) contain distinctive statutory terminology that faces minimal corpus competition.
+   - *Section Terminology & Query Difficulty*: Regulatory disclosures in Part III / Item 15 (End $\ge$90%) contain distinctive statutory terminology that faces minimal corpus competition, whereas middle financial disclosures search for recurring accounting terms that appear across many filings.
    - *Boundary Severance*: Fixed-size chunking splits multi-line statements in dense middle sections.
+   - *Sample-Size Limitations*: With 10 queries per bucket (and 2 to 8 queries per content format), the benchmark cannot statistically separate document position from these confounding factors, and does not demonstrate that position itself causally degrades bi-encoder retrieval.
 
 ---
 
@@ -335,6 +350,10 @@ Because the transformation $f(x) = \sqrt{2(1 - x)}$ is strictly monotonically de
 - **Recall@K**: $\frac{1}{N} \sum_{i=1}^N \frac{|R_{i, K}|}{T_i}$, where $T_i$ is the total relevant chunks for query $i$ across the corpus.
 - **MRR@K**: $\frac{1}{N} \sum_{i=1}^N \frac{1}{\text{rank}_i}$ if $\text{rank}_i \le K$, else $0.0$.
 - **Why Precision Falls and Recall Rises**: In SEC filings, benchmark queries target specific disclosures that appear in only 1 to 2 chunks ($T_i \in [1, 2]$). As $K$ expands from 1 to 10, the numerator $|R_{i, K}|$ is bounded at $\le 2$, while the denominator $K$ increases tenfold, inevitably diluting Precision@K while providing more opportunities to capture target evidence (increasing Recall@K).
+- **Recall@5 Interpretation and Distinction from Hit@5**:
+  - *Dense vs. RRF at K=5*: RRF achieves Recall@5 of 0.4333, matching Dense alone (0.4333, $\Delta = 0.0000$), while exceeding BM25 alone (0.4000, $\Delta = +0.0333$).
+  - *Distinction from Hit@5*: Hit@5 indicates whether at least one target chunk was captured in the top 5 (Dense and RRF both achieve 0.4333, or 13/30 queries; BM25 achieves 0.4000, or 12/30 queries). Recall@5 evaluates the proportion of total ground-truth chunks retrieved across queries ($\frac{1}{N} \sum |R_{i, 5}| / T_i$). Because benchmark queries have either 1 or 2 target evidence chunks ($T_i \in \{1, 2\}$), recall measures multi-chunk coverage.
+  - *Rankings vs. Aggregates*: While RRF and Dense yield identical aggregate Recall@5 (0.4333) and Hit@5 (0.4333), they do not produce identical candidate rankings or per-query outputs. RRF elevates the positions of relevant chunks within the top 5 (lifting MRR@5 from 0.2894 to 0.3678), but captures no net additional target chunks over Dense at this cutoff depth.
 
 ---
 
@@ -487,7 +506,7 @@ Reciprocal Rank Fusion (Cormack et al., SIGIR 2009) merges independent rankings 
 $$\operatorname{RRF}(d) = \sum_{r \in \{\text{Dense}, \text{BM25}\}} \frac{1}{c + \operatorname{rank}_r(d)}$$
 
 - **Parameters**: Smoothing constant $c = 60.0$, candidate pool depth $M = 50$.
-- **Contribution Bounds**: Each retriever's contribution is bounded strictly between $\frac{1}{c + 1} = \frac{1}{61} \approx 0.01639$ (Rank 1) and $\frac{1}{c + 50} = \frac{1}{110} \approx 0.00909$ (Rank 50). Unranked items receive $0.0$.
+- **Contribution Bounds**: For candidate pool depth $M = 50$, each retriever's positive contribution to a document's RRF score ranges from a maximum of $\frac{1}{c + 1} = \frac{1}{61} \approx 0.01639$ (at rank 1) down to a minimum positive contribution of $\frac{1}{c + 50} = \frac{1}{110} \approx 0.00909$ (at rank 50), inclusive. Items unranked or absent from a retriever's top-50 pool receive a contribution of exactly $0.0$ from that retriever.
 - **Consensus Rule Example**: A document ranked 5th by both retrievers receives $\frac{1}{65} + \frac{1}{65} \approx 0.03077$, outranking a document ranked 1st by Dense but missing entirely from BM25's top 50 ($\frac{1}{61} \approx 0.01639$).
 - **Role of $c$**: A smaller $c$ (e.g., $c=10$) rewards extreme top ranks; a larger $c$ (e.g., $c=60$) emphasizes mutual consensus.
 - **Why RRF was chosen**: BM25 scores $[0, \infty)$ and cosine similarities $[-1, 1]$ are mathematically incompatible. RRF uses ordinal ranks, avoiding score distortion. It is a general consensus mechanism and was not designed specifically for middle-position documents.
@@ -536,7 +555,7 @@ $$\operatorname{RRF}(d) = \sum_{r \in \{\text{Dense}, \text{BM25}\}} \frac{1}{c 
 *Multiple-Testing Note*: Across the 15 comparisons evaluated (3 model pairs $\times$ 5 metrics), applying Bonferroni correction yields an adjusted threshold of $\alpha_{\text{adjusted}} = 0.05 / 15 \approx 0.00333$ (or $\alpha = 0.0125$ for 4 Hit metrics). Under this standard threshold, **none** of the pairwise differences reach statistical significance. The asymptotic Wilcoxon signed-rank test on RRF vs. Dense MRR@10 ($W=47.0, p=0.0472$) sits right at the nominal 0.05 boundary, discards 20 tied pairs (66.7%), and does not survive multiple-testing correction.
 
 ### Where Mitigation Did Not Work
-- **No net recall gain at $K=5$**: Hit@5 remained flat at 0.4333 (0.0000 delta).
+- **No net recall gain over Dense at $K=5$**: RRF yields no Recall@5 gain over Dense alone at this cutoff (both at 0.4333, delta 0.0000), while its Recall@5 is 0.0333 higher than BM25 alone (0.4333 vs. 0.4000). Both RRF and Dense achieve Hit@5 of 0.4333 (13/30 queries with evidence retrieved), whereas BM25 achieves Hit@5 of 0.4000 (12/30 queries). Equal aggregate metrics do not imply identical rankings or identical per-query performance: RRF elevates MRR@5 from 0.2894 (Dense) to 0.3678 by promoting candidate ranks within the top 5, but uncovers no net additional relevant chunks over Dense at this cutoff.
 - **BM25 alone achieves equal hit counts to RRF at top ranks**: At $K=1$ and $K=3$, BM25 achieves equal hit counts as RRF on different queries ($b=1, c=1$ in the McNemar test, while MRR@3 differs at 0.3556 vs. 0.3611) and outperforms RRF on Beginning MRR@10 (0.4333 vs. 0.3600).
 - **Middle Hit@5 was 0.4000 for Dense and RRF, while BM25 was 0.3000**: RRF matched Dense at 0.4000 (delta 0.0000 vs. Dense) and outperformed BM25 by +0.1000; RRF provided no recall expansion over Dense alone at this depth.
 - **Gains were not middle-specific**: Improvements occurred across Beginning and End buckets as well, consistent with RRF acting as a general lexical-semantic consensus filter rather than a middle-specific repair.
@@ -639,7 +658,7 @@ RANKED RETRIEVED CHUNKS:
   - `beautifulsoup4==4.15.0`
 - **Automated Test Results**:
   - `pytest --collect-only -q`: **82 tests collected in 1.15s** (measured 2026-10-14).
-  - `pytest -q`: **82 passed in 32.61s** (measured 2026-10-14; session range 32-39s).
+  - `pytest -q`: **82 passed in 37.69s** (measured clean-clone verification on Windows, 2026-10-14; timing across repeated runs typically spans 32-39s).
 
 ---
 
@@ -651,7 +670,7 @@ RANKED RETRIEVED CHUNKS:
 4. **Lexical Query Formulation Bias**: Queries written from source text naturally share vocabulary with target evidence, advantaging BM25.
 5. **Strict Relevance Criterion**: Requiring exact character span containment marks alternative valid disclosures or comparative prior-year statements as non-relevant.
 6. **Selection Effect**: Chunking strategy and retrieval hyperparameters ($c=60, M=50$) were evaluated and selected on the same 30 benchmark queries.
-7. **RRF Indistinguishable from BM25**: At top ranks ($K=1$ and $K=3$), BM25 alone achieves equal hit counts to RRF on different queries ($b=1, c=1$ in the McNemar test, with MRR@3 of 0.3556 vs. 0.3611); RRF provides no recall advantage at $K=5$.
+7. **RRF Indistinguishable from BM25 at Top Ranks**: At top ranks ($K=1$ and $K=3$), BM25 alone achieves equal hit counts to RRF on different queries ($b=1, c=1$ in the McNemar test, with MRR@3 of 0.3556 vs. 0.3611). At cutoff $K=5$, RRF provides no Recall@5 advantage over Dense alone (both at 0.4333, delta 0.0000), though its Recall@5 is 0.0333 higher than BM25 alone (0.4333 vs. 0.4000). Equal aggregate metrics at $K=5$ reflect different candidate rankings rather than identical per-query behavior.
 8. **Heuristic Extraction Limitations**: Table extraction relies on rule-based patterns and adjacent continuation reads. It is not an end-to-end question answering system.
 9. **Index Rebuild Latency**: Rebuilding the 3,957-chunk index on CPU takes 4 to 6 minutes.
 10. **Single Embedding Model**: Evaluated exclusively on `all-MiniLM-L6-v2`; findings may not generalize to larger embedding models (e.g., BGE, E5, or modern long-context embedders).
